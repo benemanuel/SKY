@@ -796,7 +796,6 @@ function updateAllVisuals() {
   updateSeasonInfo();
   updateSeasonalHoursInfo();
   createBackgroundDecoration();
-  updateApproximateTides(coordinates.latitude, coordinates.longitude);
 }
 
 // --- GEOLOCATION FUNCTIONALITY ---
@@ -847,64 +846,6 @@ function getLocation() {
     }
     locationDisplay.textContent = `שגיאה: ${errorMessage}`;
   }
-}
-
-
-// Function to get the current Julian date
-function getJulianDay(date) {
-    const time = date.getTime();
-    const utc = time / 86400000.0 + 2440587.5;
-    return utc;
-}
-
-// Function to calculate the Moon's transit time (highest point in the sky)
-function getMoonTransitTime(latitude, longitude) {
-    const today = new Date();
-    const jd = getJulianDay(today);
-
-    // Simplified calculation for moon position (this is not precise)
-    const T = (jd - 2451545.0) / 36525;
-    const lunarLongitude = 218.316 + 481267.881342 * T + 6.289 * Math.sin(134.963 + 477198.8676 * T);
-    const lunarRA = (lunarLongitude % 360) / 15; // Rough approximation of Right Ascension
-
-    // Get the sidereal time
-    const lmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + longitude;
-    const lst = (lmst % 360) / 15;
-
-    // The transit time is when the Moon's RA matches the local sidereal time
-    let transitTime = lst - lunarRA;
-    if (transitTime < 0) transitTime += 24;
-    
-    // The second transit is roughly 12.42 hours later
-    const secondTransitTime = (transitTime + 12.42) % 24;
-
-    return { first: transitTime, second: secondTransitTime };
-}
-
-// Function to calculate and display the approximate tide times
-function updateApproximateTides(latitude, longitude) {
-    // Get the moon transit times
-    const { first, second } = getMoonTransitTime(latitude, longitude);
-
-    // Approximate high tides at moon transit times
-    const highTide1 = new Date();
-    highTide1.setHours(Math.floor(first), Math.floor((first % 1) * 60), 0);
-
-    const highTide2 = new Date();
-    highTide2.setHours(Math.floor(second), Math.floor((second % 1) * 60), 0);
-    
-    // Approximate low tides halfway between the high tides
-    const lowTide1 = new Date(highTide1.getTime() + (6.21 * 3600 * 1000));
-    const lowTide2 = new Date(highTide2.getTime() + (6.21 * 3600 * 1000));
-
-    // Determine the next high and low tides
-    const now = new Date();
-    const nextHigh = (now.getTime() < highTide1.getTime() ? highTide1 : highTide2);
-    const nextLow = (now.getTime() < lowTide1.getTime() ? lowTide1 : lowTide2);
-
-    // Update the HTML with the times
-    document.getElementById('moonHighTide').textContent = nextHigh.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
-    document.getElementById('moonLowTide').textContent = nextLow.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
 }
 
 // --- INITIALIZATION ---
