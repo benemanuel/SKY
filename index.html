@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>השמים מספרים</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+   <link rel="stylesheet" href="sky.css" type="text/css">
+</head>
+<!-- ?lat=XX.XXXX&lon=YY.YYYY  eg: ?lat=40.7128&lon=-74.0060 -->
+<body class="light-mode">
+
+<button class="location-toggle" id="locationToggle" aria-label="Toggle location">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="location-icon">
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"></path>
+    <circle cx="12" cy="9" r="3"></circle>
+  </svg>
+</button>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+
+  <div class="container">
+    <div class="header">
+      <h1 class="title">הַשָּׁמַ֗יִם מְסַפְּרִ֥ים כְּֽבֺוד־אֵ֑ל וּמַֽ֘עֲשֵׂ֥ה יָ֝דָ֗יו מַגִּ֥יד הָֽרָקִֽיעַ׃</h1>
+    </div>
+    
+    <!-- div class="date-time">
+      <p class="date" id="currentDate" hidden></p>
+      <p class="time" id="currentTime" hidden></p>
+	  <p class="location" id="locationDisplay" hidden></p>	  
+    </div -->
+    
+    <div class="cards-container">
+	<div class="date-time">
+	    <h2 class="card-header" id="currentDate"></h2>
+	     <div class="week-circle" id="weekVisualization">
+    <!-- Fallback SVG -->
+    <svg class="week-circle-svg" viewBox="0 0 100 100" style="display: none;">
+      <circle cx="50" cy="50" r="40" fill="none" stroke="#dee2e6" stroke-width="8" />
+    </svg>
+  </div>
+       <!-- div class="week-circle" id="weekVisualization"></div -->
+       <p class="time" id="currentTime" hidden></p>
+
+    </div>
+
+	 <!-- Seasonal hours card -->
+    <div class="card hours-card" id="hoursCard">
+      <h2 class="card-header" hidden>שעות עונתיות</h2>
+      <div class="hours-grid" hidden>
+        <div class="hours-item" hidden>
+          <p class="hours-label">זריחה:</p>
+          <p class="hours-value" id="sunriseTime"></p>
+        </div>
+        <div class="hours-item" hidden>
+          <p class="hours-label">שקיעה:</p>
+          <p class="hours-value" id="sunsetTime"></p>
+        </div>
+        <div class="hours-item" hidden>
+          <p class="hours-label">משך היום:</p>
+          <p class="hours-value" id="dayLength"></p>
+        </div>
+        <div class="hours-item" hidden>
+          <p class="hours-label">משך הלילה:</p>
+          <p class="hours-value" id="nightLength"></p>
+        </div>
+      </div>
+      
+      <div class="current-hour">
+        <h2 class="card-header">השעה כעת</h2>
+        <p class="hours-label" id="hoursLabel" hidden></p>
+        <p class="hour-number" id="currentHour" hidden></p>
+        <div class="hour-segments" id="hourSegments"></div>
+        <!-- <p class="hour-minutes" id="hourMinutes"></p> -->
+      </div>
+	         <p class="location" id="locationDisplay" hidden></p>
+    </div>
+	
+      <!-- Lunar card -->
+      <div class="card" id="lunarCard">
+        <h2 class="card-header">יום ירחי</h2>
+        <div class="moon-container">
+          <div class="moon" id="moonVisualization">
+            <!-- Moon phases will be inserted here by JS -->
+          </div>
+        </div>
+        <p class="moon-day" id="lunarDay"></p>
+        <p class="moon-phase-name" id="lunarPhase"></p>
+        <!-- p class="moon-cycle">מתוך מחזור ירחי של 29.5 ימים</p -->
+      </div>
+      
+      <!-- Season card -->
+      <div class="card" id="seasonCard">
+        <h2 class="card-header">עונה</h2>
+        <div class="season-container">
+          <div class="season-icon" id="seasonIcon"></div>
+          <p class="season-name" id="seasonName"></p>
+          <!-- Modified progress bar with three sections -->
+          <div class="progress-bar">
+            <div class="progress-section">
+              <div class="progress-fill" id="seasonProgressSection1"></div>
+            </div>
+            <div class="progress-section">
+              <div class="progress-fill" id="seasonProgressSection2"></div>
+            </div>
+            <div class="progress-section">
+              <div class="progress-fill" id="seasonProgressSection3"></div>
+            </div>
+          </div>
+          <p class="season-days" id="seasonDays"></p>
+          <p class="season-remaining" id="seasonRemaining"></p>
+        </div>
+      </div>
+    </div>
+    
+   
+    
+    <!-- div class="footer">
+      <p>הערה: תאריכי העונות הם משוערים ומבוססים על חצי הכדור הצפוני.</p>
+    </div -->
+    
+    <div class="bg-decoration" id="bgDecoration">
+      <!-- Background elements will be added by JS -->
+    </div>
+  </div>
+
+  <script src="sky.js"></script>
+
+</body>
+</html>

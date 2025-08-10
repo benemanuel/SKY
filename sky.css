@@ -1,0 +1,861 @@
+
+    :root {
+      --bg-light: #ffffff;
+      --bg-dark: #121212;
+      --card-bg-light: #f8f9fa;
+      --card-bg-dark: #1e1e1e;
+      --text-light: #212529;
+      --text-dark: #e9ecef;
+      --subtext-light: #6c757d;
+      --subtext-dark: #adb5bd;
+      --border-light: #dee2e6;
+      --border-dark: #343a40;
+      
+      /* Season Colors - Light Mode */
+      --spring-light-bg: linear-gradient(to bottom right, #e6f7e6, #c3e6cb);
+      --spring-light-text: #28a745;
+      --summer-light-bg: linear-gradient(to bottom right, #fff3cd, #ffe8a1);
+      --summer-light-text: #b7791f;
+      --fall-light-bg: linear-gradient(to bottom right, #ffe5d0, #ffcc99);
+      --fall-light-text: #fd7e14;
+      --winter-light-bg: linear-gradient(to bottom right, #e6f2ff, #cfe2ff);
+      --winter-light-text: #0d6efd;
+      
+      /* Season Colors - Dark Mode */
+      --spring-dark-bg: linear-gradient(to bottom right, #145214, #0d3d0d);
+      --spring-dark-text: #82d98b;
+      --summer-dark-bg: linear-gradient(to bottom right, #705a10, #4d3c00);
+      --summer-dark-text: #ffd43b;
+      --fall-dark-bg: linear-gradient(to bottom right, #7d3b08, #592a06);
+      --fall-dark-text: #ff922b;
+      --winter-dark-bg: linear-gradient(to bottom right, #0c326e, #051d4d);
+      --winter-dark-text: #74c0fc;
+      
+      /* Hour Colors - Light Mode */
+      --day-light-bg: linear-gradient(to bottom right, #fff7cc, #ffe066);
+      --day-light-text: #a67c00;
+      --night-light-bg: linear-gradient(to bottom right, #e5e9ff, #c5cae9);
+      --night-light-text: #3949ab;
+      
+      /* Hour Colors - Dark Mode */
+      --day-dark-bg: linear-gradient(to bottom right, #856404, #664d03);
+      --day-dark-text: #ffd43b;
+      --night-dark-bg: linear-gradient(to bottom right, #1a237e, #121858);
+      --night-dark-text: #b1bee3;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      direction: rtl;
+      padding: 0.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    body.light-mode {
+      background-color: var(--bg-light);
+      color: var(--text-light);
+    }
+    
+    body.dark-mode {
+      background-color: var(--bg-dark);
+      color: var(--text-dark);
+    }
+    
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 36rem;
+      margin: 0 auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border-radius: 0.5rem;
+      overflow: hidden;
+      padding: 1rem;
+      z-index: 1;
+    }
+    
+    .light-mode .container {
+      background-color: var(--bg-light);
+      border: 1px solid var(--border-light);
+    }
+    
+    .dark-mode .container {
+      background-color: var(--bg-dark);
+      border: 1px solid var(--border-dark);
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--border-light);
+    }
+    
+    .dark-mode .header {
+      border-bottom-color: var(--border-dark);
+    }
+    
+    .title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+    
+    .date-time {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    
+    .date {
+      font-size: 1rem;
+      font-weight: 500;
+    }
+    
+    .time {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    
+    .cards-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    @media (min-width: 640px) {
+      .container {
+        padding: 1.5rem;
+      }
+      
+      .title {
+        font-size: 1.5rem;
+      }
+      
+      .header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+      }
+      
+      .date {
+        font-size: 1.1rem;
+      }
+      
+      .time {
+        font-size: 1.25rem;
+      }
+    }
+    
+    @media (min-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      .cards-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+    }
+    
+    .card {
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    @media (min-width: 640px) {
+      .card {
+        padding: 1rem;
+      }
+    }
+    
+    .light-mode .card {
+      background-color: var(--card-bg-light);
+      border: 1px solid var(--border-light);
+    }
+    
+    .dark-mode .card {
+      background-color: var(--card-bg-dark);
+      border: 1px solid var(--border-dark);
+    }
+    
+    .card-header {
+      text-align: center;
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    @media (min-width: 640px) {
+      .card-header {
+        padding-bottom: 0.75rem;
+        margin-bottom: 0.75rem;
+        font-size: 1.1rem;
+      }
+    }
+    
+    .dark-mode .card-header {
+      border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Moon styles */
+    .moon-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .moon {
+      width: 6rem;
+      height: 6rem;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid;
+    }
+    
+    @media (min-width: 640px) {
+      .moon-container {
+        margin-bottom: 1rem;
+      }
+      
+      .moon {
+        width: 8rem;
+        height: 8rem;
+      }
+    }
+    
+    .light-mode .moon {
+      background-color: #e0e0e0;
+      border-color: #bdbdbd;
+    }
+    
+    .dark-mode .moon {
+      background-color: #424242;
+      border-color: #616161;
+    }
+    
+    .moon-phase {
+      position: absolute;
+      top: 0;
+      height: 100%;
+    }
+    
+    .light-mode .moon-phase.dark {
+      background-color: #757575;
+    }
+    
+    .dark-mode .moon-phase.dark {
+      background-color: #212121;
+    }
+    
+    .light-mode .moon-phase.light {
+      background-color: #f5f5f5;
+    }
+    
+    .dark-mode .moon-phase.light {
+      background-color: #e0e0e0;
+    }
+    
+    .moon-day {
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+    
+    .moon-phase-name {
+      text-align: center;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    @media (min-width: 640px) {
+      .moon-day {
+        font-size: 1.5rem;
+      }
+      
+      .moon-phase-name {
+        font-size: 1rem;
+      }
+    }
+    
+    .moon-cycle {
+      text-align: center;
+      font-size: 0.75rem;
+      opacity: 0.8;
+    }
+    
+    /* Season styles */
+    .season-container {
+      text-align: center;
+    }
+    
+    .season-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      margin: 0 auto 0.75rem;
+    }
+    
+    .season-name {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    @media (min-width: 640px) {
+      .season-icon {
+        width: 3rem;
+        height: 3rem;
+        margin: 0 auto 1rem;
+      }
+      
+      .season-name {
+        font-size: 1.5rem;
+        margin-bottom: 0.75rem;
+      }
+    }
+    
+    /* Modified progress bar with three sections */
+    .progress-bar {
+      width: 100%;
+      height: 0.5rem;
+      background-color: rgba(0, 0, 0, 0.1);
+      border-radius: 1rem;
+      margin-bottom: 0.5rem;
+      overflow: hidden;
+      display: flex;
+      position: relative;
+	  direction: rtl; /* Make the flex container RTL */
+    }
+    
+    .dark-mode .progress-bar {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .progress-section {
+      height: 100%;
+      width: 33.33%; /* Each section is one-third of the total width */
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .progress-section:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      left: 0; /* Changed from right to left for RTL */
+      top: 0;
+      width: 1px;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.5);
+      z-index: 1;
+    }
+    
+    .dark-mode .progress-section:not(:last-child)::after {
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .progress-fill {
+      height: 100%;
+      position: absolute;
+      top: 0;
+      right: 0; /* Changed from left to right for RTL */
+      transition: width 0.5s ease-in-out;
+      border-radius: 1rem;
+    }
+    
+    .light-mode .progress-fill {
+      background-color: rgba(0, 0, 0, 0.6);
+    }
+    
+    .dark-mode .progress-fill {
+      background-color: rgba(255, 255, 255, 0.6);
+    }
+    
+    .season-days {
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .season-remaining {
+      font-size: 0.75rem;
+    }
+    
+    @media (min-width: 640px) {
+      .progress-bar {
+        height: 0.625rem;
+      }
+      
+      .season-days, .season-remaining {
+        font-size: 0.875rem;
+      }
+    }
+    
+    /* Hours styles */
+    .hours-card {
+      margin-top: 0.75rem;
+    }
+    
+    @media (min-width: 640px) {
+      .hours-card {
+        margin-top: 1rem;
+      }
+    }
+    
+    .hours-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    @media (min-width: 640px) {
+      .hours-grid {
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+    }
+    
+    .hours-item {
+      text-align: center;
+    }
+    
+    .hours-label {
+      font-size: 0.75rem;
+      opacity: 0.8;
+      margin-bottom: 0.25rem;
+    }
+    
+    .hours-value {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    @media (min-width: 640px) {
+      .hours-value {
+        font-size: 1rem;
+      }
+    }
+    
+    .current-hour {
+      text-align: center;
+      margin-top: 0.75rem;
+    }
+    
+    @media (min-width: 640px) {
+      .current-hour {
+        margin-top: 1rem;
+      }
+    }
+    
+    .hour-number {
+      font-size: 1.25rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    @media (min-width: 640px) {
+      .hour-number {
+        font-size: 1.5rem;
+      }
+    }
+    
+    .hour-progress {
+      margin-bottom: 0.5rem;
+    }
+    
+    .hour-minutes {
+      font-size: 0.75rem;
+    }
+    
+    @media (min-width: 640px) {
+      .hour-minutes {
+        font-size: 0.875rem;
+      }
+    }
+    
+   .theme-toggle {
+    position: fixed; /* Change from absolute to fixed */
+    top: 20px; /* Align with location toggle */
+    left: 80px; /* Adjust the left position to be next to location toggle */
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1000; /* Add z-index to be on top */
+    width: 1.75rem;
+    height: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+    
+    @media (min-width: 640px) {
+      .theme-toggle {
+   position: fixed; /* Change from absolute to fixed for consistent positioning */
+        top: 20px; /* Align vertically with the location button */
+        left: 80px; /* Adjust the left position to be next to the location button */
+        width: 2rem;
+        height: 2rem;
+      }
+    }
+    
+    .light-mode .theme-toggle {
+      background-color: #e9ecef;
+      color: #495057;
+    }
+    
+    .dark-mode .theme-toggle {
+      background-color: #343a40;
+      color: #ced4da;
+    }
+    
+    .theme-toggle:hover {
+      opacity: 0.9;
+    }
+    
+    .footer {
+      text-align: center;
+      font-size: 0.75rem;
+      margin-top: 1rem;
+      opacity: 0.7;
+    }
+    
+    @media (min-width: 640px) {
+      .footer {
+        margin-top: 1.5rem;
+      }
+    }
+    
+    /* Season-specific styles */
+    .season-spring.light-mode {
+      background: var(--spring-light-bg);
+      color: var(--spring-light-text);
+    }
+    
+    .season-spring.dark-mode {
+      background: var(--spring-dark-bg);
+      color: var(--spring-dark-text);
+    }
+    
+    .season-summer.light-mode {
+      background: var(--summer-light-bg);
+      color: var(--summer-light-text);
+    }
+    
+    .season-summer.dark-mode {
+      background: var(--summer-dark-bg);
+      color: var(--summer-dark-text);
+    }
+    
+    .season-fall.light-mode {
+      background: var(--fall-light-bg);
+      color: var(--fall-light-text);
+    }
+    
+    .season-fall.dark-mode {
+      background: var(--fall-dark-bg);
+      color: var(--fall-dark-text);
+    }
+    
+    .season-winter.light-mode {
+      background: var(--winter-light-bg);
+      color: var(--winter-light-text);
+    }
+    
+    .season-winter.dark-mode {
+      background: var(--winter-dark-bg);
+      color: var(--winter-dark-text);
+    }
+    
+    /* Hour-specific styles */
+    .hours-day.light-mode {
+      background: var(--day-light-bg);
+      color: var(--day-light-text);
+    }
+    
+    .hours-day.dark-mode {
+      background: var(--day-dark-bg);
+      color: var(--day-dark-text);
+    }
+    
+    .hours-night.light-mode {
+      background: var(--night-light-bg);
+      color: var(--night-light-text);
+    }
+    
+    .hours-night.dark-mode {
+      background: var(--night-dark-bg);
+      color: var(--night-dark-text);
+    }
+    
+    /* Background decorations */
+    .bg-decoration {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.05;
+      pointer-events: none;
+    }
+    
+    .bg-element {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(3rem);
+    }
+    
+    /* SVG Icons */
+    .svg-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      stroke: currentColor;
+    }
+    
+    @media (min-width: 640px) {
+      .svg-icon {
+        width: 3rem;
+        height: 3rem;
+      }
+    }
+	
+	.hour-segments {
+      display: flex;
+      gap: 0.125rem;
+      margin-top: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    @media (min-width: 640px) {
+      .hour-segments {
+        gap: 0.25rem;
+        margin-top: 1rem;
+      }
+    }
+    
+    .hour-segment {
+      flex: 0 0 calc(16.666% - 0.125rem);
+      height: 1.25rem;
+      background-color: var(--segment-bg);
+      position: relative;
+      border-radius: 0.25rem;
+      overflow: hidden;
+      margin-bottom: 0.125rem;
+    }
+    
+    @media (min-width: 480px) {
+      .hour-segment {
+        flex: 0 0 calc(16.666% - 0.125rem);
+      }
+    }
+    
+    @media (min-width: 640px) {
+      .hour-segment {
+        flex: 0 0 calc(16.666% - 0.25rem);
+        height: 1.5rem;
+        margin-bottom: 0.25rem;
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .hour-segment {
+        flex: 0 0 calc(8.333% - 0.25rem);
+      }
+    }
+
+    .segment-fill {
+      height: 100%;
+      width: 50%;
+      background-color: var(--segment-fill);
+    }
+
+    .segment-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 0.625rem;
+      color: var(--segment-text);
+    }
+    
+    @media (min-width: 640px) {
+      .segment-label {
+        font-size: 0.75rem;
+      }
+    }
+
+    /* Define variables based on day/night and light/dark mode */
+    .light-mode .hours-day .hour-segment {
+      --segment-bg: #e9ecef;
+      --segment-fill: #28a745; /* Green for day */
+      --segment-text: #495057;
+    }
+
+    .dark-mode .hours-day .hour-segment {
+      --segment-bg: #343a40;
+      --segment-fill: #82d98b; /* Lighter green for day */
+      --segment-text: #ced4da;
+    }
+
+    .light-mode .hours-night .hour-segment {
+      --segment-bg: #e9ecef;
+      --segment-fill: #0d6efd; /* Blue for night */
+      --segment-text: #495057;
+    }
+
+    .dark-mode .hours-night .hour-segment {
+      --segment-bg: #343a40;
+      --segment-fill: #74c0fc; /* Lighter blue for night */
+      --segment-text: #ced4da;
+    }
+    
+    /* Daytime styles */
+    .hours-day .hour-segment {
+      background-color: #f8f9fa; /* Light gray background */
+      color: #212529; /* Dark text */
+    }
+    .hours-day .hour-segment .segment-fill {
+      background-color: #28a745; /* Green fill for progress */
+    }
+
+    /* Nighttime styles */
+    .hours-night .hour-segment {
+      background-color: #343a40; /* Dark gray background */
+      color: #e9ecef; /* Light text */
+    }
+    .hours-night .hour-segment .segment-fill {
+      background-color: #74c0fc; /* Light blue fill for progress */
+    }
+	
+	.week-circle {
+  width: 4rem;
+  height: 4rem;
+  position: relative;
+  margin: 0 auto 0.5rem;
+}
+
+.week-circle-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.week-circle-svg[style*="display: none"] {
+  display: none !important;
+}
+
+.week-segment {
+  fill: transparent;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: fill 0.3s ease;
+}
+
+.light-mode .week-segment {
+  stroke: #dee2e6;
+}
+
+.dark-mode .week-segment {
+  stroke: #343a40;
+}
+
+.light-mode .week-segment.filled {
+  fill: #6c757d;
+}
+
+.dark-mode .week-segment.filled {
+  fill: #adb5bd;
+}
+
+@media (min-width: 640px) {
+  .week-circle {
+    width: 5rem;
+    height: 5rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+
+
+/* Update the .theme-toggle class */
+.theme-toggle {
+    position: fixed;
+    top: 0.75rem;
+    left: 2.75rem; /* Adjust this value to place it next to the location toggle */
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
+    width: 1.75rem;
+    height: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+@media (min-width: 640px) {
+    .theme-toggle {
+        top: 1rem;
+        left: 4rem; /* Adjust this value for larger screens */
+        width: 2rem;
+        height: 2rem;
+    }
+}
+
+/* Add styles for the new location-toggle button */
+.location-toggle {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1000;
+    width: 1.75rem;
+    height: 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+@media (min-width: 640px) {
+    .location-toggle {
+        top: 1rem;
+        left: 1rem;
+        width: 2rem;
+        height: 2rem;
+    }
+}
+
+.light-mode .location-toggle {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.dark-mode .location-toggle {
+    background-color: #343a40;
+    color: #ced4da;
+}
+
+.location-toggle:hover {
+    opacity: 0.9;
+}

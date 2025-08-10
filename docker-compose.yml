@@ -1,0 +1,9 @@
+services:
+  web:
+    hostname: sky
+    build: .
+    container_name: sky
+    ports:
+      - "8300:80"
+    volumes:
+      - .:/usr/share/nginx/html
