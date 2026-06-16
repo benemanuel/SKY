@@ -1,6 +1,7 @@
 package com.sky.app.ui.components
 
 import android.location.Location
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -9,8 +10,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.sky.app.domain.CelestialCalculations
 import java.time.Instant
 import java.time.LocalTime
@@ -35,8 +38,9 @@ fun SunTimesCard(sunTimes: CelestialCalculations.SunTimes, location: Location) {
             .fillMaxWidth()
             .padding(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = Color(0xFF1a1a2e).copy(alpha = 0.7f)
+        ),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -44,67 +48,64 @@ fun SunTimesCard(sunTimes: CelestialCalculations.SunTimes, location: Location) {
                 .padding(24.dp)
         ) {
             Text(
-                "☀️ Sun Times",
+                "☀️ Sun",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
+                color = Color(0xFFFFC107),
                 modifier = Modifier.padding(bottom = 16.dp)
-            )
-
-            Text(
-                "Location: ${String.format("%.4f, %.4f", location.latitude, location.longitude)}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(bottom = 12.dp)
             )
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Column {
-                    Text(
-                        "Sunrise",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        String.format("%02d:%02d", sunriseTime.hour, sunriseTime.minute),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                SunInfoBox(
+                    label = "Sunrise",
+                    value = String.format("%02d:%02d", sunriseTime.hour, sunriseTime.minute),
+                    modifier = Modifier.weight(1f)
+                )
 
-                Column {
-                    Text(
-                        "Sunset",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        String.format("%02d:%02d", sunsetTime.hour, sunsetTime.minute),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                SunInfoBox(
+                    label = "Sunset",
+                    value = String.format("%02d:%02d", sunsetTime.hour, sunsetTime.minute),
+                    modifier = Modifier.weight(1f)
+                )
 
-                Column {
-                    Text(
-                        "Day Length",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        String.format("%02dh %02dm", hours, minutes),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+                SunInfoBox(
+                    label = "Day",
+                    value = String.format("%dh %02dm", hours, minutes),
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun SunInfoBox(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .background(
+                Color(0xFF262d4a),
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp)
+            )
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            label,
+            style = MaterialTheme.typography.labelSmall,
+            color = Color(0xFFa8d8ff),
+            fontSize = 10.sp
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            value,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color(0xFFFFC107)
+        )
     }
 }

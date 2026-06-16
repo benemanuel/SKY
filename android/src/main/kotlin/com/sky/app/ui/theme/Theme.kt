@@ -64,7 +64,7 @@ private val darkColorScheme = darkColorScheme(
 
 @Composable
 fun SkyTheme(
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    useDarkTheme: Boolean = true, // Night sky is the PRIMARY experience
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {

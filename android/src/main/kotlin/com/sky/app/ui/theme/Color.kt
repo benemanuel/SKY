@@ -2,68 +2,74 @@ package com.sky.app.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Light theme colors
-val PrimaryLight = Color(0xFF006DB3)
-val OnPrimaryLight = Color(0xFFFFFFFF)
-val PrimaryContainerLight = Color(0xFFCCE4FF)
-val OnPrimaryContainerLight = Color(0xFF001E42)
+// Celestial palette - night sky focused
+// Primary accent: warm gold (sun, moon, highlights)
+// Secondary: cool cyan (twilight, stars)
+// Base: deep indigo/charcoal (night sky)
 
-val SecondaryLight = Color(0xFF0D5BA8)
-val OnSecondaryLight = Color(0xFFFFFFFF)
-val SecondaryContainerLight = Color(0xFFD4E3FF)
+// Light theme colors (inverted sky - daytime)
+val PrimaryLight = Color(0xFFFFC107)  // Gold - celestial accent
+val OnPrimaryLight = Color(0xFF1a1a2e) // Dark text on gold
+val PrimaryContainerLight = Color(0xFFFFE082)
+val OnPrimaryContainerLight = Color(0xFF3E2723)
+
+val SecondaryLight = Color(0xFFA8D8FF)  // Cyan - twilight accent
+val OnSecondaryLight = Color(0xFF1a1a2e)
+val SecondaryContainerLight = Color(0xFFD1E7FF)
 val OnSecondaryContainerLight = Color(0xFF001C48)
 
-val TertiaryLight = Color(0xFF6D5C00)
-val OnTertiaryLight = Color(0xFFFFFFFF)
-val TertiaryContainerLight = Color(0xFFFCDf85)
-val OnTertiaryContainerLight = Color(0xFF251A00)
+val TertiaryLight = Color(0xFF64B5F6)  // Sky blue
+val OnTertiaryLight = Color(0xFF1a1a2e)
+val TertiaryContainerLight = Color(0xFFBBDEFB)
+val OnTertiaryContainerLight = Color(0xFF0D47A1)
 
 val ErrorLight = Color(0xFFB3261E)
 val ErrorContainerLight = Color(0xFFF9DEDC)
 val OnErrorLight = Color(0xFFFFFFFF)
 val OnErrorContainerLight = Color(0xFF410E0B)
 
-val BackgroundLight = Color(0xFFFBFCFE)
-val OnBackgroundLight = Color(0xFF1A1B1F)
+val BackgroundLight = Color(0xFFF5F5F5)  // Very light gray
+val OnBackgroundLight = Color(0xFF1a1a2e)
 
-val SurfaceLight = Color(0xFFFBFCFE)
-val OnSurfaceLight = Color(0xFF1A1B1F)
-val SurfaceVariantLight = Color(0xFFDEE3EB)
-val OnSurfaceVariantLight = Color(0xFF49454E)
+val SurfaceLight = Color(0xFFFFFFFF)  // White cards
+val OnSurfaceLight = Color(0xFF1a1a2e)
+val SurfaceVariantLight = Color(0xFFF0F0F0)
+val OnSurfaceVariantLight = Color(0xFF666666)
 
-val OutlineLight = Color(0xFF79747E)
-val OutlineVariantLight = Color(0xFFCAC7D0)
+val OutlineLight = Color(0xFFDDDDDD)
+val OutlineVariantLight = Color(0xFFEEEEEE)
 val ScrimLight = Color(0xFF000000)
 
-// Dark theme colors
-val PrimaryDark = Color(0xFF99CBFF)
-val OnPrimaryDark = Color(0xFF003366)
-val PrimaryContainerDark = Color(0xFF004A8A)
-val OnPrimaryContainerDark = Color(0xFFCCE4FF)
+// Dark theme colors (night sky - PRIMARY EXPERIENCE)
+// Deep indigo base with gold and cyan accents
+val PrimaryDark = Color(0xFFFFC107)   // Warm gold (sun/moon/highlights)
+val OnPrimaryDark = Color(0xFF1a1a2e) // Dark text on gold
+val PrimaryContainerDark = Color(0xFFFFB300)
+val OnPrimaryContainerDark = Color(0xFF0f1a3d)
 
-val SecondaryDark = Color(0xFFA8CBFF)
-val OnSecondaryDark = Color(0xFF003373)
-val SecondaryContainerDark = Color(0xFF004B8F)
-val OnSecondaryContainerDark = Color(0xFFD4E3FF)
+val SecondaryDark = Color(0xFFA8D8FF)  // Cool cyan (twilight/stars)
+val OnSecondaryDark = Color(0xFF0f1a3d)
+val SecondaryContainerDark = Color(0xFF5A9FD4)
+val OnSecondaryContainerDark = Color(0xFFE3F2FD)
 
-val TertiaryDark = Color(0xFFE5C400)
-val OnTertiaryDark = Color(0xFF3E2E00)
-val TertiaryContainerDark = Color(0xFF564400)
-val OnTertiaryContainerDark = Color(0xFFFCDf85)
+val TertiaryDark = Color(0xFF64B5F6)  // Sky blue
+val OnTertiaryDark = Color(0xFF0f1a3d)
+val TertiaryContainerDark = Color(0xFF1E88E5)
+val OnTertiaryContainerDark = Color(0xFFE3F2FD)
 
-val ErrorDark = Color(0xFFF2B8B5)
-val ErrorContainerDark = Color(0xFF8C1D18)
-val OnErrorDark = Color(0xFF601410)
-val OnErrorContainerDark = Color(0xFFF9DEDC)
+val ErrorDark = Color(0xFFEF9A9A)
+val ErrorContainerDark = Color(0xFFC62828)
+val OnErrorDark = Color(0xFF0f1a3d)
+val OnErrorContainerDark = Color(0xFFFFEBEE)
 
-val BackgroundDark = Color(0xFF1A1B1F)
-val OnBackgroundDark = Color(0xFFE4E2E6)
+val BackgroundDark = Color(0xFF0f1a3d)    // Deep indigo - night sky
+val OnBackgroundDark = Color(0xFFe8e8f0)  // Silver/white text
 
-val SurfaceDark = Color(0xFF1A1B1F)
-val OnSurfaceDark = Color(0xFFE4E2E6)
-val SurfaceVariantDark = Color(0xFF49454E)
-val OnSurfaceVariantDark = Color(0xFFCAC7D0)
+val SurfaceDark = Color(0xFF1a1a2e)       // Darker indigo - card surfaces
+val OnSurfaceDark = Color(0xFFe8e8f0)     // Silver text on dark
+val SurfaceVariantDark = Color(0xFF262d4a) // Slightly lighter surface
+val OnSurfaceVariantDark = Color(0xFFa8d8ff) // Cyan text
 
-val OutlineDark = Color(0xFF938F99)
-val OutlineVariantDark = Color(0xFF49454E)
+val OutlineDark = Color(0xFF3a4a6a)       // Subtle dividers
+val OutlineVariantDark = Color(0xFF2a3a5a) // Darker dividers
 val ScrimDark = Color(0xFF000000)

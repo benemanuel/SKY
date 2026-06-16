@@ -24,8 +24,9 @@ fun WeekProgressCard(currentDateTime: LocalDateTime) {
             .fillMaxWidth()
             .padding(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = Color(0xFF1a1a2e).copy(alpha = 0.7f)
+        ),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -33,18 +34,11 @@ fun WeekProgressCard(currentDateTime: LocalDateTime) {
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                "Week Progress",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
-
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    .height(52.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 repeat(daysInWeek) { day ->
                     val dayNumber = day + 1
@@ -54,30 +48,32 @@ fun WeekProgressCard(currentDateTime: LocalDateTime) {
                             .fillMaxHeight()
                             .background(
                                 if (dayNumber <= dayOfWeek)
-                                    MaterialTheme.colorScheme.primary
+                                    Color(0xFFA8D8FF)
                                 else
-                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp)
+                                    Color(0xFF3a4a6a),
+                                shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             dayNumber.toString(),
                             fontWeight = FontWeight.Bold,
+                            fontSize = androidx.compose.material3.MaterialTheme.typography.labelMedium.fontSize,
                             color = if (dayNumber <= dayOfWeek)
-                                MaterialTheme.colorScheme.onPrimary
+                                Color(0xFF0f1a3d)
                             else
-                                MaterialTheme.colorScheme.onSurface
+                                Color(0xFF3a4a6a)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Text(
                 "Day $dayOfWeek of $daysInWeek",
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.labelSmall,
+                color = Color(0xFFA8D8FF)
             )
         }
     }
