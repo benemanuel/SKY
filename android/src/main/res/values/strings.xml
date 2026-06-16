@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SKY</string>
+    <string name="toggle_theme">Toggle Theme</string>
+    <string name="set_location">Set Location</string>
+</resources>
