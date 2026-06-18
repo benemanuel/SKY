@@ -2,8 +2,8 @@ import java.util.Properties
 import java.io.FileInputStream
 
 plugins {
-    id("com.android.application") version "8.13.2"
-    kotlin("android") version "1.9.25"
+    id("com.android.application")
+    kotlin("android")
 }
 
 // Load release signing credentials from keystore.properties (not committed).
@@ -69,6 +69,8 @@ android {
 }
 
 dependencies {
+    implementation(project(":core"))
+
     implementation(platform("androidx.compose:compose-bom:2024.01.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.material3:material3")

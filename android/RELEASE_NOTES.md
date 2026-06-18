@@ -1,5 +1,27 @@
 # SKY — Release Notes
 
+## v1.2.0
+
+### New: Wear OS watch face (Galaxy Watch 6 / Wear OS 4)
+- A code-based (Jetpack Watch Face / Canvas) watch face in a new `:wear` module.
+- Four concentric notched rings, no text, each divided into its cycle and filled
+  clockwise from the top by progress:
+  - **Season** — 3 notches (thirds)
+  - **Lunar** — 4 notches (quarters of the ~29.5-day cycle)
+  - **Week** — 7 notches (days)
+  - **Hour** — 12 notches (temporal day/night hours)
+- Colors follow `colors.txt` (12-hue wheel):
+  - Season = the current season's triad (e.g. Spring: Violet, Red-Violet, Red).
+  - Hour = the 00:00–11:00 wheel (Blue-Violet → Blue).
+  - Lunar = the current lunar day's wheel color (Day N table).
+  - Week keeps per-day colors (no week mapping in `colors.txt`).
+- Per-minute updates; dimmed ambient mode; Jerusalem default for sun/hour math.
+
+### Refactor: shared `:core` module
+- Extracted `CelestialCalculations` and `HebrewStrings` into a `:core` Android
+  library shared by the phone app and the watch face — one source of truth,
+  no more duplicated calculation code.
+
 ## v1.1.0 (versionCode 2)
 
 **Artifact:** `Sky-release.apk` · signed (APK Signature Scheme v2)
