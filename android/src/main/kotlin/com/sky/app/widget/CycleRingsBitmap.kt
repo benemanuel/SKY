@@ -5,48 +5,49 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
 import androidx.compose.ui.graphics.toArgb
+import com.sky.app.domain.CyclePalette
 import com.sky.app.ui.theme.Inst
 
 /**
- * Minimalist graphic of the three nested cycles as concentric progress rings:
- * outer = season, middle = week, inner = (temporal) hour. Each ring fills
- * clockwise from the top by its progress, in the cycle's accent color.
- * Widgets can't host a Compose Canvas, so this is baked to a Bitmap.
+ * Four concentric notched rings (season / lunar / week / hour) baked to a
+ * Bitmap for the widget — the same design as the watch face. Colors per
+ * colors.txt via the shared CyclePalette.
  */
 object CycleRingsBitmap {
 
-    fun render(
-        sizePx: Int,
-        seasonFrac: Float,
-        seasonColor: Int,
-        weekFrac: Float,
-        weekColor: Int,
-        hourFrac: Float,
-        hourColor: Int
-    ): Bitmap {
+    private val RADIUS = floatArrayOf(0.86f, 0.70f, 0.54f, 0.38f) // outer → inner, of half-size
+
+    fun render(sizePx: Int, rings: List<CyclePalette.Ring>): Bitmap {
         val bmp = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888)
         val c = Canvas(bmp)
         val center = sizePx / 2f
-        val stroke = sizePx * 0.075f
+        val track = Inst.faint.toArgb()
 
         val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
-            strokeWidth = stroke
-            strokeCap = Paint.Cap.ROUND
+            strokeCap = Paint.Cap.BUTT
+            strokeWidth = sizePx * 0.055f
         }
-        val track = Inst.faint.toArgb()
 
-        val radii = floatArrayOf(sizePx * 0.40f, sizePx * 0.285f, sizePx * 0.17f)
-        val fracs = floatArrayOf(seasonFrac, weekFrac, hourFrac)
-        val colors = intArrayOf(seasonColor, weekColor, hourColor)
-
-        for (i in 0..2) {
-            val r = radii[i]
+        rings.forEachIndexed { idx, ring ->
+            if (idx >= RADIUS.size) return@forEachIndexed
+            val r = center * RADIUS[idx]
             val rect = RectF(center - r, center - r, center + r, center + r)
-            paint.color = track
-            c.drawArc(rect, 0f, 360f, false, paint)
-            paint.color = colors[i]
-            c.drawArc(rect, -90f, fracs[i].coerceIn(0f, 1f) * 360f, false, paint)
+            val segAngle = 360f / ring.segments
+            val gap = segAngle * 0.12f
+            val sweepFull = segAngle - gap
+            val elapsed = ring.fraction.coerceIn(0f, 1f) * ring.segments
+
+            for (i in 0 until ring.segments) {
+                val segStart = -90f + i * segAngle + gap / 2f
+                paint.color = track
+                c.drawArc(rect, segStart, sweepFull, false, paint)
+                val fill = (elapsed - i).coerceIn(0f, 1f)
+                if (fill > 0f) {
+                    paint.color = ring.colors[i]
+                    c.drawArc(rect, segStart, sweepFull * fill, false, paint)
+                }
+            }
         }
         return bmp
     }

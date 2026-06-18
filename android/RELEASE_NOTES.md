@@ -1,5 +1,24 @@
 # SKY — Release Notes
 
+## v1.3.0 (versionCode 3)
+
+### Unified "cycle rings" design across app, widget, and watch
+- The four-ring instrument is now the single design language on every surface,
+  driven by a shared model in `:core` (`CyclePalette`): four concentric notched
+  rings, each divided into its cycle and filled clockwise from the top by
+  progress, colored per `colors.txt`.
+  - **season** — 3 notches (the current season's triad)
+  - **lunar** — **29 notches** (one per day of the month, each in its day's
+    wheel color)
+  - **week** — 7 notches (per-day colors)
+  - **hour** — 12 notches (the 00:00–11:00 wheel)
+- **Phone app** is now pure rings — the title verse, moon dial, lunar day,
+  phase, and tide text were removed; the rings fill the screen. Uses the device
+  location when already granted, otherwise the Jerusalem default (no on-screen
+  control).
+- **Widget** uses the same four notched rings (2×2 rings; 4×2 adds the moon).
+- **Watch face** uses the shared `CyclePalette` (now 29-part lunar).
+
 ## v1.2.0
 
 ### New: Wear OS watch face (Galaxy Watch 6 / Wear OS 4)
