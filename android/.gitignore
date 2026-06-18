@@ -23,6 +23,8 @@ proguard/
 # Local dev helpers / scratch
 build.bat
 sky_shot*.png
+widget_shot.png
+Screenshot_*.png
 
 # Android Studio
 .idea/

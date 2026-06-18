@@ -1,5 +1,22 @@
 # SKY — Release Notes
 
+## v1.1.0 (versionCode 2)
+
+**Artifact:** `Sky-release.apk` · signed (APK Signature Scheme v2)
+**Requirements:** Android 8.0+ (minSdk 26, target SDK 34)
+
+### New: home-screen widget
+- A Jetpack Glance App Widget showing the three nested cycles as a minimalist
+  graphic — concentric progress rings: outer = season, middle = week,
+  inner = (temporal) hour, each filling clockwise from the top in its accent
+  color (season tint, brass week, gold-by-day / blue-by-night hour).
+- **2×2** shows the rings; **4×2** adds the moon dial + lunar day.
+- Resizable on both axes (down to a square 2×2); simple 30-minute auto-refresh.
+- Uses the Jerusalem default for sun/hour math (a widget can't request the GPS
+  permission); lunar, week, and season values are location-independent.
+- Shares calculations with the app (`CelestialCalculations`) and the moon/ring
+  drawing is baked to a Bitmap since widgets can't host a Compose canvas.
+
 ## v1.0.0 (versionCode 1)
 
 **Artifact:** `Sky-release.apk` · ~3.0 MB · signed (APK Signature Scheme v2)
