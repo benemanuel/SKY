@@ -64,17 +64,17 @@ private val darkColorScheme = darkColorScheme(
 
 @Composable
 fun SkyTheme(
-    useDarkTheme: Boolean = true, // Night sky is the PRIMARY experience
+    useDarkTheme: Boolean = false, // Web app defaults to light-mode
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        useDarkTheme -> darkColorScheme
-        else -> lightColorScheme
-    }
+    val colorScheme = if (useDarkTheme) darkColorScheme else lightColorScheme
+    val skyColors = if (useDarkTheme) DarkSkyColors else LightSkyColors
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    androidx.compose.runtime.CompositionLocalProvider(LocalSkyColors provides skyColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
 }

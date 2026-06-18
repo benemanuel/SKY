@@ -2,13 +2,13 @@ package com.sky.app.data
 
 import android.Manifest
 import android.app.Application
-import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationManager
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import android.content.pm.PackageManager
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 
 class LocationRepository(private val application: Application) {
 
@@ -16,34 +16,45 @@ class LocationRepository(private val application: Application) {
         LocationServices.getFusedLocationProviderClient(application)
     }
 
+    fun hasPermission(): Boolean =
+        ContextCompat.checkSelfPermission(
+            application, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                application, Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+    /**
+     * Requests a current GPS fix. Falls back to the last known location, then
+     * to null (the caller keeps its default coordinates). [callback] runs on
+     * the main thread.
+     */
     fun getCurrentLocation(callback: (Location?) -> Unit) {
-        if (ContextCompat.checkSelfPermission(
-                application,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
+        if (!hasPermission()) {
             callback(null)
             return
         }
 
         try {
-            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                if (location != null) {
-                    callback(location)
-                } else {
-                    getDefaultLocation(callback)
+            val cts = CancellationTokenSource()
+            fusedLocationClient
+                .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cts.token)
+                .addOnSuccessListener { location ->
+                    if (location != null) callback(location) else lastKnown(callback)
                 }
-            }
-        } catch (e: Exception) {
-            getDefaultLocation(callback)
+                .addOnFailureListener { lastKnown(callback) }
+        } catch (e: SecurityException) {
+            callback(null)
         }
     }
 
-    private fun getDefaultLocation(callback: (Location?) -> Unit) {
-        val location = Location(LocationManager.NETWORK_PROVIDER).apply {
-            latitude = 31.7683
-            longitude = 35.2137
+    private fun lastKnown(callback: (Location?) -> Unit) {
+        try {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { callback(it) }
+                .addOnFailureListener { callback(null) }
+        } catch (e: SecurityException) {
+            callback(null)
         }
-        callback(location)
     }
 }

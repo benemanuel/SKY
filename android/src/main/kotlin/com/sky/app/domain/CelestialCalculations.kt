@@ -1,164 +1,291 @@
 package com.sky.app.domain
 
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.Month
-import kotlin.math.*
+import java.time.ZoneId
+import java.time.ZoneOffset
+import kotlin.math.PI
+import kotlin.math.acos
+import kotlin.math.asin
+import kotlin.math.ceil
+import kotlin.math.cos
+import kotlin.math.floor
+import kotlin.math.roundToInt
+import kotlin.math.sin
 
+/**
+ * Faithful port of the web app's sky.js calculations so the Android app
+ * produces identical output to the original webpage.
+ */
 object CelestialCalculations {
 
+    data class TimeHM(val hours: Int, val minutes: Int)
+
     data class LunarInfo(
-        val dayOfCycle: Int,
+        // Raw lunar day in the 1..29.53 cycle (used for the moon visualization).
+        val lunarDay: Double,
+        // Rounded value shown as "יום N".
+        val displayDay: Int,
         val phaseName: String,
-        val illumination: Float
+        // 0..100 position in the cycle, used to draw the lit fraction.
+        val normalizedPercent: Double
     )
 
     data class SeasonInfo(
         val name: String,
-        val daysElapsed: Int,
-        val daysRemaining: Int
+        val elapsedDays: Int,
+        val totalDays: Int,
+        val remainingDays: Int
     )
 
     data class SunTimes(
-        val sunrise: Long,
-        val sunset: Long,
-        val dayLength: Long
+        val sunrise: TimeHM,
+        val sunset: TimeHM,
+        val dayLength: Double,   // hours
+        val nightLength: Double  // hours
     )
 
-    // Reference new moon: January 6, 2000
-    private val REFERENCE_NEW_MOON = LocalDate.of(2000, 1, 6)
-    private const val LUNAR_CYCLE_DAYS = 29.53058867
+    data class SeasonalHour(
+        val hourNumber: Int,
+        val isDaytime: Boolean,
+        val hourLengthMinutes: Double,
+        val minutesIntoHour: Int
+    )
 
-    fun calculateLunarInfo(now: LocalDateTime): LunarInfo {
-        val daysSinceReference = now.toLocalDate().toEpochDay() - REFERENCE_NEW_MOON.toEpochDay()
-        val dayInCycle = (daysSinceReference % LUNAR_CYCLE_DAYS.toLong()).toInt()
+    data class TideTimes(
+        val nextHigh: TimeHM,
+        val nextLow: TimeHM
+    )
 
-        val illumination = when {
-            dayInCycle < 7 -> (dayInCycle / 7f) * 0.5f
-            dayInCycle < 15 -> 0.5f + ((dayInCycle - 7) / 7.5f) * 0.5f
-            dayInCycle < 22 -> 1f - ((dayInCycle - 15) / 7f) * 0.5f
-            else -> (1f - ((dayInCycle - 22) / 7.5f)) * 0.5f
-        }
+    private const val LUNAR_CYCLE = 29.53
+    private val REFERENCE_NEW_MOON: Instant = Instant.parse("2025-03-01T08:24:00Z")
+    private const val MS_PER_DAY = 1000.0 * 60 * 60 * 24
 
-        val phaseName = when (dayInCycle) {
-            in 0..3 -> "🌑 New Moon"
-            in 4..10 -> "🌒 Waxing Crescent"
-            in 11..14 -> "🌓 First Quarter"
-            in 15..21 -> "🌔 Waxing Gibbous"
-            in 22..24 -> "🌕 Full Moon"
-            in 25..28 -> "🌖 Waning Gibbous"
-            else -> "🌗 Waning Crescent"
-        }
+    // --- Lunar ------------------------------------------------------------
 
-        return LunarInfo(dayInCycle, phaseName, illumination.coerceIn(0f, 1f))
+    fun calculateLunarInfo(now: LocalDateTime, zone: ZoneId = ZoneId.systemDefault()): LunarInfo {
+        val nowInstant = now.atZone(zone).toInstant()
+        val msDiff = nowInstant.toEpochMilli() - REFERENCE_NEW_MOON.toEpochMilli()
+        val daysDiff = msDiff / MS_PER_DAY
+
+        var lunarDay = (daysDiff % LUNAR_CYCLE) + 1
+        if (lunarDay < 1) lunarDay += LUNAR_CYCLE // guard dates before the reference
+
+        val normalized = ((lunarDay - 1) / LUNAR_CYCLE) * 100
+        return LunarInfo(
+            lunarDay = lunarDay,
+            displayDay = lunarDay.roundToInt(),
+            phaseName = getLunarPhase(lunarDay),
+            normalizedPercent = normalized
+        )
     }
 
-    fun calculateSeasonInfo(now: LocalDateTime): SeasonInfo {
-        val month = now.month
-        val dayOfMonth = now.dayOfMonth
-        val dayOfYear = now.toLocalDate().dayOfYear
+    private fun getLunarPhase(lunarDay: Double): String = when {
+        lunarDay < 1.5 -> HebrewStrings.NEW_MOON
+        lunarDay < 7 -> HebrewStrings.WAXING_CRESCENT
+        lunarDay < 8.5 -> HebrewStrings.FIRST_QUARTER
+        lunarDay < 14 -> HebrewStrings.WAXING_GIBBOUS
+        lunarDay < 16 -> HebrewStrings.FULL_MOON
+        lunarDay < 22 -> HebrewStrings.WANING_GIBBOUS
+        lunarDay < 23.5 -> HebrewStrings.LAST_QUARTER
+        else -> HebrewStrings.WANING_CRESCENT
+    }
 
-        val (seasonName, springDay, summerDay, autumnDay, winterDay) = when {
-            (month == Month.MARCH && dayOfMonth >= 21) ||
-            (month in Month.APRIL..Month.MAY) ||
-            (month == Month.JUNE && dayOfMonth < 21) -> {
-                Triple("Spring", 80, Triple("🌱", 172, 79))
+    // --- Season -----------------------------------------------------------
+
+    fun calculateSeason(now: LocalDateTime, zone: ZoneId = ZoneId.systemDefault()): SeasonInfo {
+        val year = now.year
+
+        // Northern-hemisphere approximations, matching sky.js (local midnight).
+        val springEquinox = LocalDateTime.of(year, 3, 20, 0, 0)
+        val summerSolstice = LocalDateTime.of(year, 6, 21, 0, 0)
+        val fallEquinox = LocalDateTime.of(year, 9, 22, 0, 0)
+        val winterSolstice = LocalDateTime.of(year, 12, 21, 0, 0)
+
+        val name: String
+        val seasonStart: LocalDateTime
+        val seasonEnd: LocalDateTime
+
+        if (now >= winterSolstice || now < springEquinox) {
+            name = HebrewStrings.WINTER
+            if (now >= winterSolstice) {
+                // Late December: winter runs into next year's spring equinox.
+                seasonStart = winterSolstice
+                seasonEnd = LocalDateTime.of(year + 1, 3, 20, 0, 0)
+            } else {
+                // Jan 1 – Mar 19: winter began at last year's solstice.
+                seasonStart = LocalDateTime.of(year - 1, 12, 21, 0, 0)
+                seasonEnd = springEquinox
             }
-            (month == Month.JUNE && dayOfMonth >= 21) ||
-            (month in Month.JULY..Month.AUGUST) ||
-            (month == Month.SEPTEMBER && dayOfMonth < 23) -> {
-                Triple("Summer", 172, Triple("☀️", 265, 92))
-            }
-            (month == Month.SEPTEMBER && dayOfMonth >= 23) ||
-            (month in Month.OCTOBER..Month.NOVEMBER) ||
-            (month == Month.DECEMBER && dayOfMonth < 21) -> {
-                Triple("Autumn", 265, Triple("🍂", 355, 89))
-            }
-            else -> {
-                Triple("Winter", 355, Triple("❄️", 79, 84))
-            }
-        }
-
-        val seasonDays = when (seasonName) {
-            "Spring" -> 93
-            "Summer" -> 94
-            "Autumn" -> 89
-            else -> 89
-        }
-
-        val startDay = when (seasonName) {
-            "Spring" -> 80
-            "Summer" -> 172
-            "Autumn" -> 265
-            else -> 355
-        }
-
-        val daysElapsed = (dayOfYear - startDay).coerceAtLeast(0)
-        val daysRemaining = (seasonDays - daysElapsed).coerceAtLeast(0)
-
-        return SeasonInfo(seasonName, daysElapsed, daysRemaining)
-    }
-
-    fun calculateSunTimes(now: LocalDateTime, latitude: Double, longitude: Double): SunTimes {
-        val julianDay = toJulianDay(now.toLocalDate())
-        val timeOfDayFraction = (now.hour + now.minute / 60.0 + now.second / 3600.0) / 24.0
-
-        val sunriseTime = calculateSunrise(julianDay, latitude, longitude)
-        val sunsetTime = calculateSunset(julianDay, latitude, longitude)
-
-        val sunriseMilestones = now.toLocalDate().atTime(
-            (sunriseTime * 24).toInt(),
-            ((sunriseTime * 24 * 60) % 60).toInt()
-        ).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-
-        val sunsetMilestones = now.toLocalDate().atTime(
-            (sunsetTime * 24).toInt(),
-            ((sunsetTime * 24 * 60) % 60).toInt()
-        ).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-
-        val dayLength = (sunsetTime - sunriseTime) * 24 * 60 * 60 * 1000
-
-        return SunTimes(sunriseMilestones, sunsetMilestones, dayLength.toLong())
-    }
-
-    private fun toJulianDay(date: LocalDate): Double {
-        val a = (14 - date.monthValue) / 12
-        val y = date.year + 4800 - a
-        val m = date.monthValue + 12 * a - 3
-        return date.dayOfMonth + (153 * m + 2) / 5 + 365 * y + y / 4 - y / 100 + y / 400 - 32045.0
-    }
-
-    private fun calculateSunrise(jd: Double, latitude: Double, longitude: Double): Double {
-        return calculateSunPosition(jd, latitude, longitude, true)
-    }
-
-    private fun calculateSunset(jd: Double, latitude: Double, longitude: Double): Double {
-        return calculateSunPosition(jd, latitude, longitude, false)
-    }
-
-    private fun calculateSunPosition(jd: Double, latitude: Double, longitude: Double, isSunrise: Boolean): Double {
-        val n = jd - 2451545.0 + 0.0008
-        val j = n - longitude / 360.0
-
-        val m = (357.5291 + 0.98560028 * j) % 360.0
-        val c = (1.9146 - 0.004817 * j - 0.000014 * j * j) * sin(Math.toRadians(m)) +
-                (0.019993 - 0.000101 * j) * sin(Math.toRadians(2 * m)) +
-                0.00029 * sin(Math.toRadians(3 * m))
-
-        val lambd = (280.4665 + 36000.76983 * j + 0.0003032 * j * j + c) % 360.0
-
-        val jTransit = 2451545.5 + j + 0.0053 * sin(Math.toRadians(m)) - 0.0069 * sin(Math.toRadians(2 * lambd))
-        val delta = Math.toDegrees(asin(sin(Math.toRadians(lambd)) * sin(Math.toRadians(23.4393))))
-
-        val cosH = (-sin(Math.toRadians(0.833)) - sin(Math.toRadians(latitude)) * sin(Math.toRadians(delta))) /
-                (cos(Math.toRadians(latitude)) * cos(Math.toRadians(delta)))
-
-        return if (cosH > 1 || cosH < -1) {
-            0.5 // Polar day or night
+        } else if (now < summerSolstice) {
+            name = HebrewStrings.SPRING
+            seasonStart = springEquinox
+            seasonEnd = summerSolstice
+        } else if (now < fallEquinox) {
+            name = HebrewStrings.SUMMER
+            seasonStart = summerSolstice
+            seasonEnd = fallEquinox
         } else {
-            val h = Math.toDegrees(acos(cosH)) / 360.0
-            val offset = if (isSunrise) jTransit - h else jTransit + h
-            ((offset - floor(offset)) * 24).toDouble() / 24.0
+            name = HebrewStrings.FALL
+            seasonStart = fallEquinox
+            seasonEnd = winterSolstice
         }
+
+        val startMs = seasonStart.atZone(zone).toInstant().toEpochMilli()
+        val endMs = seasonEnd.atZone(zone).toInstant().toEpochMilli()
+        val nowMs = now.atZone(zone).toInstant().toEpochMilli()
+
+        val totalDays = ((endMs - startMs) / MS_PER_DAY).roundToInt()
+        val elapsedDays = ceil((nowMs - startMs) / MS_PER_DAY).toInt()
+        val remainingDays = totalDays - elapsedDays
+
+        return SeasonInfo(name, elapsedDays, totalDays, remainingDays)
     }
+
+    // --- Sun times --------------------------------------------------------
+
+    fun calculateSunTimes(
+        now: LocalDateTime,
+        lat: Double,
+        lon: Double,
+        zone: ZoneId = ZoneId.systemDefault()
+    ): SunTimes {
+        val nowInstant = now.atZone(zone).toInstant()
+        val timeZoneOffset = zone.rules.getOffset(nowInstant).totalSeconds / 3600.0
+
+        val utc = nowInstant.atZone(ZoneOffset.UTC)
+        val year = utc.year
+        val startOfYearMs = LocalDate.of(year, 1, 1).atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+        val n = floor((nowInstant.toEpochMilli() - startOfYearMs) / MS_PER_DAY) + 1
+
+        val delta = 23.45 * sin(2 * PI * (n - 80) / 365)
+        val b = 2 * PI * (n - 81) / 365
+        val e = (9.87 * sin(2 * b) - 7.53 * cos(b) - 1.5 * sin(b)) / 60
+
+        val latRad = lat * PI / 180
+        val deltaRad = delta * PI / 180
+        val cosOmega = (sin(-0.8333 * PI / 180) - sin(latRad) * sin(deltaRad)) /
+            (cos(latRad) * cos(deltaRad))
+
+        if (cosOmega > 1) {
+            return SunTimes(TimeHM(0, 0), TimeHM(0, 0), 0.0, 24.0)
+        }
+        if (cosOmega < -1) {
+            return SunTimes(TimeHM(0, 0), TimeHM(0, 0), 24.0, 0.0)
+        }
+
+        val omega = acos(cosOmega) * 180 / PI
+        val dayLength = 2 * (omega / 15)
+        val nightLength = 24 - dayLength
+
+        val sunriseUtc = 12 - (omega / 15) - e - (lon / 15)
+        val sunsetUtc = 12 + (omega / 15) - e - (lon / 15)
+
+        return SunTimes(
+            sunrise = hoursToTime(sunriseUtc, timeZoneOffset),
+            sunset = hoursToTime(sunsetUtc, timeZoneOffset),
+            dayLength = dayLength,
+            nightLength = nightLength
+        )
+    }
+
+    private fun hoursToTime(hours: Double, timeZoneOffset: Double): TimeHM {
+        var adjusted = hours + timeZoneOffset
+        while (adjusted < 0) adjusted += 24
+        while (adjusted >= 24) adjusted -= 24
+        val h = floor(adjusted).toInt()
+        val m = floor((adjusted - h) * 60).toInt()
+        return TimeHM(h, m)
+    }
+
+    // --- Seasonal (temporal) hour ----------------------------------------
+
+    fun calculateSeasonalHour(now: LocalDateTime, sunTimes: SunTimes): SeasonalHour {
+        val currentTimeInHours = now.hour + now.minute / 60.0
+        val sunriseInHours = sunTimes.sunrise.hours + sunTimes.sunrise.minutes / 60.0
+        val sunsetInHours = sunTimes.sunset.hours + sunTimes.sunset.minutes / 60.0
+
+        val isDaytime = currentTimeInHours >= sunriseInHours && currentTimeInHours < sunsetInHours
+
+        if (isDaytime) {
+            val dayHourLength = sunTimes.dayLength / 12
+            val hoursSinceSunrise = currentTimeInHours - sunriseInHours
+            val hourNumber = floor(hoursSinceSunrise / dayHourLength).toInt() + 1
+            val hourStart = sunriseInHours + (hourNumber - 1) * dayHourLength
+            val minutesIntoHour = floor((currentTimeInHours - hourStart) * 60).toInt()
+            return SeasonalHour(hourNumber, true, dayHourLength * 60, minutesIntoHour.coerceAtLeast(0))
+        }
+
+        val nightHourLength = sunTimes.nightLength / 12
+        var hourNumber: Int
+        if (currentTimeInHours >= sunsetInHours) {
+            val hoursSinceSunset = currentTimeInHours - sunsetInHours
+            hourNumber = floor(hoursSinceSunset / nightHourLength).toInt() + 1
+        } else {
+            val adjustedTime = currentTimeInHours + 24 - sunsetInHours
+            hourNumber = floor(adjustedTime / nightHourLength).toInt() + 1
+            if (hourNumber > 12) hourNumber = 1
+        }
+
+        val hourStart: Double
+        if (currentTimeInHours >= sunsetInHours) {
+            hourStart = sunsetInHours + (hourNumber - 1) * nightHourLength
+        } else {
+            val hoursFromMidnightToSunset = 24 - sunsetInHours
+            val effectiveStart = (hourNumber - 1) * nightHourLength - hoursFromMidnightToSunset
+            var hs = if (effectiveStart >= 0) effectiveStart else effectiveStart + 24
+            if (currentTimeInHours < hs) hs -= 24
+            hourStart = hs
+        }
+
+        val minutesIntoHour = floor((currentTimeInHours - hourStart) * 60).toInt()
+        return SeasonalHour(hourNumber, false, nightHourLength * 60, minutesIntoHour.coerceAtLeast(0))
+    }
+
+    // --- Tides (from moon transit) ---------------------------------------
+
+    fun calculateTides(now: LocalDateTime, lon: Double, zone: ZoneId = ZoneId.systemDefault()): TideTimes {
+        val nowInstant = now.atZone(zone).toInstant()
+        val jd = nowInstant.toEpochMilli() / 86400000.0 + 2440587.5
+
+        val t = (jd - 2451545.0) / 36525
+        val lunarLongitude = 218.316 + 481267.881342 * t + 6.289 * sin(134.963 + 477198.8676 * t)
+        val lunarRA = (lunarLongitude % 360) / 15
+
+        val lmst = 280.46061837 + 360.98564736629 * (jd - 2451545.0) + lon
+        val lst = (lmst % 360) / 15
+
+        var first = lst - lunarRA
+        if (first < 0) first += 24
+        val second = (first + 12.42) % 24
+
+        val highTide1 = atTimeToday(now, first, zone)
+        val highTide2 = atTimeToday(now, second, zone)
+        val lowTide1 = highTide1.plusMillis((6.21 * 3600 * 1000).toLong())
+        val lowTide2 = highTide2.plusMillis((6.21 * 3600 * 1000).toLong())
+
+        val nowMs = nowInstant.toEpochMilli()
+        val nextHigh = if (nowMs < highTide1.toEpochMilli()) highTide1 else highTide2
+        val nextLow = if (nowMs < lowTide1.toEpochMilli()) lowTide1 else lowTide2
+
+        return TideTimes(instantToTime(nextHigh, zone), instantToTime(nextLow, zone))
+    }
+
+    private fun atTimeToday(now: LocalDateTime, hoursFraction: Double, zone: ZoneId): Instant {
+        val h = floor(hoursFraction).toInt()
+        val m = floor((hoursFraction % 1) * 60).toInt()
+        return now.toLocalDate().atTime(h.coerceIn(0, 23), m.coerceIn(0, 59))
+            .atZone(zone).toInstant()
+    }
+
+    private fun instantToTime(instant: Instant, zone: ZoneId): TimeHM {
+        val z = instant.atZone(zone)
+        return TimeHM(z.hour, z.minute)
+    }
+
+    // --- Week -------------------------------------------------------------
+
+    /** Day of week with Sunday = 0 .. Saturday = 6, matching JS Date.getDay(). */
+    fun dayOfWeekSundayZero(now: LocalDateTime): Int = now.dayOfWeek.value % 7
 }

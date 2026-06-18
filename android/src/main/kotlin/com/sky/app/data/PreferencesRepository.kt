@@ -1,6 +1,7 @@
 package com.sky.app.data
 
 import android.app.Application
+import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -28,5 +29,3 @@ class PreferencesRepository(private val application: Application) {
         }
     }
 }
-
-private val android.content.Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "sky_preferences")

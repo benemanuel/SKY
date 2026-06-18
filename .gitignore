@@ -1,0 +1,5 @@
+# IDE
+.idea/
+
+# JVM heap dumps
+*.hprof

@@ -17,6 +17,13 @@ proguard/
 # Log Files
 *.log
 
+# JVM heap dumps
+*.hprof
+
+# Local dev helpers / scratch
+build.bat
+sky_shot*.png
+
 # Android Studio
 .idea/
 *.iws
@@ -41,6 +48,7 @@ emulator.log
 # Keystore files
 *.jks
 *.keystore
+keystore.properties
 
 # Google Play services json file
 google-services.json
