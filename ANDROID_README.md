@@ -1,148 +1,162 @@
-# SKY Android App
+# SKY — Android
 
-A modern Android application that displays celestial and temporal information including lunar cycles, seasons, and sunrise/sunset times based on the user's location.
+A native port of the SKY web app (`index.html` / `sky.js`) that reads the sky at a
+glance. The same celestial math drives three surfaces — a **phone app**, a
+**home-screen widget**, and a **Wear OS watch face** — all sharing one visual
+language: four concentric **notched cycle rings**.
 
-## Features
+The four cycles, from outer to inner:
 
-- **Current Date & Time**: Displays the current day of the week in Hebrew, time, and date with animated updates
-- **Week Progress**: Visual representation of the week's progress with a segmented progress indicator
-- **Lunar Cycle Tracking**: Shows current lunar phase, day in the lunar cycle, and illumination percentage
-- **Seasonal Information**: Displays current season with days elapsed and remaining in the season
-- **Dynamic Day/Night Cycle**: Calculates and displays sunrise/sunset times and total daylight duration based on location
-- **Geolocation Support**: Uses device location or allows manual location input via coordinates
-- **Dark Mode Support**: Toggle between light and dark themes with persistent preferences
+| Ring | Segments | Meaning |
+|------|----------|---------|
+| Season | 3 | the current season (tekufah), split into thirds |
+| Lunar | 29 | the day within the ~29.5-day lunar month |
+| Week | 7 | the day within the week |
+| Hour | 12 | the temporal (halachic) day/night hour |
 
-## Technical Stack
+Each ring fills clockwise from the top by its current progress and is colored from a
+12-hue wheel (see `colors.txt`): the season's triad, each lunar day's wheel color, a
+per-day color for the week, and the 00:00–11:00 wheel for the hour.
 
-- **Language**: Kotlin
-- **UI Framework**: Jetpack Compose (Material3)
-- **Architecture**: MVVM with ViewModel and StateFlow
-- **Data Persistence**: DataStore Preferences
-- **Location Services**: Google Play Services Location API
-- **Build System**: Gradle with Kotlin DSL
+## Surfaces
 
-## Project Structure
+- **Phone app** — the whole screen is the instrument: the four notched rings on a
+  midnight ground, no text. Uses the device location when granted, otherwise a
+  Jerusalem default.
+- **Home-screen widget** (Jetpack Glance) — 2×2 shows the rings; 4×2 adds a moon
+  dial + lunar day. Simple 30-minute auto-refresh.
+- **Wear OS watch face** (Galaxy Watch 6 / Wear OS 4) — a code-based Canvas watch
+  face of the same four rings, with a dim monochrome ambient mode.
+
+## Modules
 
 ```
 android/
-├── src/main/
+├── build.gradle.kts            # phone app (com.sky.app) + widget
+├── settings.gradle.kts         # includes :core and :wear
+├── core/                       # :core — shared, pure-Kotlin logic (no Android UI)
+│   └── src/main/kotlin/com/sky/app/domain/
+│       ├── CelestialCalculations.kt   # lunar / season / sun / temporal hours / tides
+│       ├── HebrewStrings.kt           # Hebrew phase + season names
+│       └── CyclePalette.kt            # colors.txt wheel + the four-ring model
+├── src/main/                   # phone app module
 │   ├── kotlin/com/sky/app/
 │   │   ├── MainActivity.kt
-│   │   ├── domain/
-│   │   │   └── CelestialCalculations.kt
-│   │   ├── data/
-│   │   │   ├── LocationRepository.kt
-│   │   │   └── PreferencesRepository.kt
-│   │   ├── viewmodel/
-│   │   │   └── SkyViewModel.kt
-│   │   └── ui/
-│   │       ├── SkyApp.kt
-│   │       ├── theme/
-│   │       │   ├── Theme.kt
-│   │       │   ├── Color.kt
-│   │       │   └── Typography.kt
-│   │       └── components/
-│   │           ├── DateTimeCard.kt
-│   │           ├── WeekProgressCard.kt
-│   │           ├── LunarCard.kt
-│   │           ├── SeasonCard.kt
-│   │           ├── SunTimesCard.kt
-│   │           └── LocationInputCard.kt
+│   │   ├── data/               # LocationRepository, PreferencesRepository
+│   │   ├── viewmodel/SkyViewModel.kt
+│   │   ├── ui/                 # SkyApp (rings), theme/ (Instrument palette)
+│   │   └── widget/             # SkyGlanceWidget, CycleRingsBitmap, MoonBitmap
 │   └── res/
-│       ├── values/
-│       │   ├── strings.xml
-│       │   └── styles.xml
-├── AndroidManifest.xml
-├── build.gradle.kts
-└── settings.gradle.kts
+└── wear/                       # :wear — Wear OS watch face
+    └── src/main/kotlin/com/sky/app/wear/
+        ├── SkyWatchFaceService.kt
+        └── SkyRenderer.kt
 ```
+
+`:core` is an Android library shared by both the phone app and the watch face, so the
+calculations and the ring/color model live in exactly one place.
+
+## Technical stack
+
+- **Language**: Kotlin 1.9.25
+- **Phone UI**: Jetpack Compose (Material3); the rings are drawn with `Canvas`
+- **Widget**: Jetpack Glance (`androidx.glance:glance-appwidget`) — rendered to a
+  bitmap since widgets can't host a Compose canvas
+- **Watch face**: Jetpack Watch Face (`androidx.wear.watchface`), `CanvasRenderer2`
+- **Time/astronomy**: `java.time`; no third-party astronomy library
+- **Build**: Gradle (Kotlin DSL), AGP 8.13.2, Compose Compiler 1.5.15
 
 ## Requirements
 
-- Android SDK 26 or higher (minimum API level 26)
-- Android Studio Arctic Fox or later
-- Kotlin 1.9.22 or later
-- Gradle 8.2.0 or later
+- Android SDK 34 (compileSdk/targetSdk 34)
+- minSdk 26 (phone/core); minSdk 30 for the Wear module
+- JDK 11+ to compile (JDK 21 works; set `JAVA_HOME`)
 
-## Building the App
+## Building
 
-1. **Clone or navigate to the repository:**
-   ```bash
-   cd android
-   ```
+```bash
+cd android
 
-2. **Build the debug APK:**
-   ```bash
-   ./gradlew assembleDebug
-   ```
+# Phone app
+./gradlew assembleDebug            # debug APK
+./gradlew assembleRelease          # signed release APK (see Signing)
+./gradlew installDebug             # install on a connected phone
 
-3. **Build the release APK:**
-   ```bash
-   ./gradlew assembleRelease
-   ```
+# Watch face
+./gradlew :wear:assembleDebug
+./gradlew :wear:assembleRelease
+```
 
-4. **Install on a device/emulator:**
-   ```bash
-   ./gradlew installDebug
-   ```
+Outputs:
+- Phone: `build/outputs/apk/{debug,release}/Sky-{debug,release}.apk`
+- Watch: `wear/build/outputs/apk/{debug,release}/wear-{debug,release}.apk`
 
-## Running the App
+### Installing the watch face
 
-1. **Open in Android Studio:**
-   - Open Android Studio
-   - Select "Open an Existing Project"
-   - Navigate to the `android` directory
-   - Click "Open"
+The Galaxy Watch has no USB, so connect over Wi-Fi:
 
-2. **Run on emulator or device:**
-   - Connect an Android device or start an emulator
-   - Click the "Run" button (green play icon) in Android Studio
-   - Select the target device
+1. On the watch: enable Developer options, then **Wireless debugging** (pair if
+   prompted).
+2. `adb connect <watch-ip>:<port>` (the port shown on the Wireless debugging screen,
+   not 5555).
+3. `adb -s <watch> install wear/build/outputs/apk/debug/wear-debug.apk`
+4. On the watch, long-press the face and select **SKY**.
 
-3. **Permissions:**
-   - The app requests fine location permission on first run
-   - Users can grant permission or provide custom coordinates manually
+## Signing
 
-## Key Algorithms
+Release builds (phone and watch) are signed from a git-ignored `keystore.properties`
+in the project root:
 
-### Lunar Phase Calculation
-- Based on a reference new moon date (January 6, 2000)
-- Uses a 29.53 day lunar cycle
-- Calculates illumination percentage and phase name
+```
+storeFile=sky-release.keystore
+storePassword=…
+keyAlias=…
+keyPassword=…
+```
 
-### Solar Times Calculation
-- Implements Julian Day conversion
-- Uses solar position algorithm
-- Accounts for user's latitude and longitude
-- Calculates sunrise, sunset, and day length
+Both `sky-release.keystore` and `keystore.properties` are git-ignored — back them up;
+they are required for every future update to the same app. The release certificate
+SHA-256 identifies the app to Play App Signing and API consoles.
 
-### Season Calculation
-- Determines current season based on date
-- Tracks days elapsed and remaining in season
-- Provides visual progress indicator
+## Calculations (ported 1:1 from `sky.js`)
 
-## Dependencies
+- **Lunar** — reference new moon `2025-03-01T08:24Z`, 29.53-day cycle; day, phase
+  name, and cycle position.
+- **Season** — real equinox/solstice dates (northern hemisphere), with correct day
+  counts across the year boundary; elapsed / total / remaining days.
+- **Sun times** — solar-position algorithm with the local timezone offset, giving
+  local sunrise/sunset and day/night length.
+- **Temporal hours** — the day or night split into 12 seasonal (halachic) hours.
+- **Tides** — approximate high/low from the moon's transit time.
+- **Week** — day of week with Sunday = 0 (matching the web's `Date.getDay()`).
 
-### Core Android
-- `androidx.activity:activity-compose` - Activity integration with Compose
-- `androidx.lifecycle:lifecycle-runtime-ktx` - Lifecycle aware coroutines
-- `androidx.datastore:datastore-preferences` - Preferences data store
+## Wear OS watch face — battery usage
 
-### Compose & Material
-- `androidx.compose.ui:ui` - Core Compose UI
-- `androidx.compose.material3:material3` - Material3 components
-- `androidx.compose.ui:ui-tooling-preview` - Compose preview
+This face is deliberately on the efficient end; the dominant factor is whether
+**Always-on Display (AOD)** is enabled, not the face itself.
 
-### Google Play Services
-- `com.google.android.gms:play-services-location` - Location services
+- **Updates once per minute** (`interactiveDrawModeUpdateDelayMillis = 60_000`) with
+  no seconds hand and no animation — no continuous redraw. (Animated faces that
+  redraw at ~60 fps are the usual drain; this one is static between minute ticks.)
+- **Trivial compute** per redraw: a little trig plus a handful of `drawArc` calls,
+  once a minute — negligible CPU/GC.
+- **No extra drains**: no complications, no sensors (heart rate/GPS), no network, and
+  no on-watch location polling (it uses the Jerusalem default).
+- **AMOLED-friendly ambient**: the ambient frame is mostly black with a few thin
+  dim-gray arcs, so very few pixels are lit.
+
+Net effect:
+
+- **AOD off** (raise-to-wake): effectively free — renders only the few seconds you
+  look at it.
+- **AOD on**: incurs the always-on cost inherent to any watch (screen lit 24/7), but
+  this face minimizes it via the mostly-black, once-per-minute ambient render.
+
+## Releases
+
+Tagged releases (`v1.x.y`) are published on GitHub with the signed APKs attached to
+the latest release. See `android/RELEASE_NOTES.md` for per-version notes.
 
 ## License
 
 This project is part of the SKY project suite.
-
-## Notes
-
-- The app uses the device's system location for timezone calculations
-- Solar calculations are approximations suitable for most use cases
-- Lunar phase calculations use a simplified model
-- For production use, consider more precise astronomical libraries if needed
