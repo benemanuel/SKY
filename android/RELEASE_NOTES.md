@@ -1,5 +1,33 @@
 # SKY — Release Notes
+   Unified four-ring "cycle" design across the phone app, home-screen widget, and Wear OS watch face, driven by a shared `:core` module.
+  
+   ## Design
+   Four concentric notched rings, each divided into its cycle and filled clockwise from the top by progress, colored per `colors.md` (12-hue wheel):
 
+   - **season** — 3 notches (the current season's triad)
+   - **lunar** — 29 notches (one per day of the month, each in its day's wheel color)
+   Four concentric notched rings, each divided into its cycle and filled clockwise from the top by progress, colored per `colors.md` (12-hue wheel):
+   
+   - **season** — 3 notches (the current season's triad)
+   - **lunar** — 29 notches (one per day of the month, each in its day's wheel color)
+   - **week** — 7 notches (per-day colors)
+   - **hour** — 12 notches (the 00:00–11:00 wheel)
+   
+   ## Surfaces
+   - **Phone app** — pure rings, no text; uses device location when granted, else the Jerusalem default.
+   - **Widget** — the same rings (2×2 rings; 4×2 adds the moon).
+   - **Watch face** — code-based Wear OS (Galaxy Watch 6) face with a dim monochrome ambient mode.
+
+   ## Assets
+   - `Sky-release.apk` — phone app (versionCode 3 / 1.3.0), signed
+   - `wear-release.apk` — watch face, signed
+   
+   Both are signed with the SKY release key (cert SHA-256 `6803c847…8675ad`) and install on Android 8.0+ (watch: Wear OS 3+).
+   
+   ## Docs
+   The `ANDROID_README.md` has been refreshed for this design (modules, build/sign/install, calculations, and watch-face battery notes), and the color spec is
+   `colors.md`. Note: these doc updates were committed on `main` after the v1.3.0 tag.
+   
 ## v1.3.0 (versionCode 3)
 
 ### Unified "cycle rings" design across app, widget, and watch
