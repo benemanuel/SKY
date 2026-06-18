@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 /**
- * Shared color wheel (colors.txt) and the four-ring model used by the watch
+ * Shared color wheel (colors.md) and the four-ring model used by the watch
  * face, the widget, and the phone app. Colors are ARGB Ints so every surface
  * (Compose, android.graphics, Wear Canvas) can consume them.
  *
@@ -35,7 +35,7 @@ object CyclePalette {
         YELLOW_ORANGE, YELLOW, YELLOW_GREEN, GREEN, BLUE_GREEN, BLUE
     )
 
-    // Weekday colors, index 0 = Sunday .. 6 = Saturday (no week mapping in colors.txt).
+    // Weekday colors, index 0 = Sunday .. 6 = Saturday (no week mapping in colors.md).
     val WEEKDAY = intArrayOf(
         0xFFE53935.toInt(), // Sunday — red
         0xFFF4D03F.toInt(), // Monday — yellow

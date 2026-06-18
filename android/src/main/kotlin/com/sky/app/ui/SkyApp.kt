@@ -33,7 +33,7 @@ import kotlin.math.min
 
 /**
  * The whole screen is the instrument: four concentric notched rings
- * (season / lunar-29 / week / hour), colored per colors.txt. No text.
+ * (season / lunar-29 / week / hour), colored per colors.md. No text.
  */
 @Composable
 fun SkyApp(viewModel: SkyViewModel) {

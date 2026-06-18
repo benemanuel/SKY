@@ -6,7 +6,7 @@
 - The four-ring instrument is now the single design language on every surface,
   driven by a shared model in `:core` (`CyclePalette`): four concentric notched
   rings, each divided into its cycle and filled clockwise from the top by
-  progress, colored per `colors.txt`.
+  progress, colored per `colors.md`.
   - **season** — 3 notches (the current season's triad)
   - **lunar** — **29 notches** (one per day of the month, each in its day's
     wheel color)
@@ -29,11 +29,11 @@
   - **Lunar** — 4 notches (quarters of the ~29.5-day cycle)
   - **Week** — 7 notches (days)
   - **Hour** — 12 notches (temporal day/night hours)
-- Colors follow `colors.txt` (12-hue wheel):
+- Colors follow `colors.md` (12-hue wheel):
   - Season = the current season's triad (e.g. Spring: Violet, Red-Violet, Red).
   - Hour = the 00:00–11:00 wheel (Blue-Violet → Blue).
   - Lunar = the current lunar day's wheel color (Day N table).
-  - Week keeps per-day colors (no week mapping in `colors.txt`).
+  - Week keeps per-day colors (no week mapping in `colors.md`).
 - Per-minute updates; dimmed ambient mode; Jerusalem default for sun/hour math.
 
 ### Refactor: shared `:core` module

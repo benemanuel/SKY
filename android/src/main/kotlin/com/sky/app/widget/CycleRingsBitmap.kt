@@ -11,7 +11,7 @@ import com.sky.app.ui.theme.Inst
 /**
  * Four concentric notched rings (season / lunar / week / hour) baked to a
  * Bitmap for the widget — the same design as the watch face. Colors per
- * colors.txt via the shared CyclePalette.
+ * colors.md via the shared CyclePalette.
  */
 object CycleRingsBitmap {
 

@@ -18,7 +18,7 @@ import kotlin.math.min
 
 /**
  * Abstract watch face: four concentric notched rings (season / lunar / week /
- * hour), each filled clockwise from the top by progress, colored per colors.txt.
+ * hour), each filled clockwise from the top by progress, colored per colors.md.
  * No text. Ring data + colors come from the shared :core CyclePalette.
  */
 class SkyRenderer(

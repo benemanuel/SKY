@@ -15,7 +15,7 @@ The four cycles, from outer to inner:
 | Hour | 12 | the temporal (halachic) day/night hour |
 
 Each ring fills clockwise from the top by its current progress and is colored from a
-12-hue wheel (see `colors.txt`): the season's triad, each lunar day's wheel color, a
+12-hue wheel (see `colors.md`): the season's triad, each lunar day's wheel color, a
 per-day color for the week, and the 00:00–11:00 wheel for the hour.
 
 ## Surfaces
@@ -38,7 +38,7 @@ android/
 │   └── src/main/kotlin/com/sky/app/domain/
 │       ├── CelestialCalculations.kt   # lunar / season / sun / temporal hours / tides
 │       ├── HebrewStrings.kt           # Hebrew phase + season names
-│       └── CyclePalette.kt            # colors.txt wheel + the four-ring model
+│       └── CyclePalette.kt            # colors.md wheel + the four-ring model
 ├── src/main/                   # phone app module
 │   ├── kotlin/com/sky/app/
 │   │   ├── MainActivity.kt
