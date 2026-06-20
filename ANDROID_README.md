@@ -26,7 +26,10 @@ per-day color for the week, and the 00:00–11:00 wheel for the hour.
 - **Home-screen widget** (Jetpack Glance) — 2×2 shows the rings; 4×2 adds a moon
   dial + lunar day. Simple 30-minute auto-refresh.
 - **Wear OS watch face** (Galaxy Watch 6 / Wear OS 4) — a code-based Canvas watch
-  face of the same four rings, with a dim monochrome ambient mode.
+  face of the same four rings, with a dim monochrome ambient mode. A **"Center"**
+  watch-face setting fills the empty middle: *None* (default), *Time* (digital
+  `H:MM`, 12/24h per system), *Mini rings* (concentric 12-segment hour + minute
+  rings), or *Two rings* (the same two rings side by side).
 
 ## Modules
 
@@ -50,6 +53,7 @@ android/
 └── wear/                       # :wear — Wear OS watch face
     └── src/main/kotlin/com/sky/app/wear/
         ├── SkyWatchFaceService.kt
+        ├── SkyStyle.kt            # "Center" user-style schema (None/Time/rings)
         └── SkyRenderer.kt
 ```
 

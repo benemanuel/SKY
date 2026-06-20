@@ -7,9 +7,12 @@ import androidx.wear.watchface.WatchFaceType
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.ComplicationSlotsManager
 import androidx.wear.watchface.style.CurrentUserStyleRepository
+import androidx.wear.watchface.style.UserStyleSchema
 
 /** Entry point for the SKY code-based watch face. */
 class SkyWatchFaceService : WatchFaceService() {
+
+    override fun createUserStyleSchema(): UserStyleSchema = SkyStyle.schema()
 
     override suspend fun createWatchFace(
         surfaceHolder: SurfaceHolder,
