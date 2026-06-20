@@ -16,7 +16,7 @@
    ## Surfaces
    - **Phone app** — pure rings, no text; uses device location when granted, else the Jerusalem default.
    - **Widget** — the same rings (2×2 rings; 4×2 adds the moon).
-   - **Watch face** — code-based Wear OS (Galaxy Watch 6) face with a dim monochrome ambient mode.
+   - **Watch face** — code-based Wear OS (Galaxy Watch 6) face with a dim monochrome ambient mode. An optional **"Center"** setting fills the middle: *None* (default), *Time* (digital, 12/24h per system), *Mini rings* (concentric hour + minute), or *Two rings* (side by side).
 
    ## Assets
    - `Sky-release.apk` — phone app (versionCode 3 / 1.3.0), signed
