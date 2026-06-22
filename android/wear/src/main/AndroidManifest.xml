@@ -41,6 +41,20 @@
                 android:resource="@drawable/watch_preview" />
         </service>
 
+        <!-- Launchable on-watch settings for the Center option. Wear OS 5 doesn't
+             surface the system "Customize" editor for code-based watch faces, so
+             this appears as its own app in the watch's app list. -->
+        <activity
+            android:name=".SkySettingsActivity"
+            android:exported="true"
+            android:label="@string/settings_name"
+            android:theme="@android:style/Theme.DeviceDefault">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>
