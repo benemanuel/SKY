@@ -2,4 +2,5 @@
 <resources>
     <string name="app_name">SKY</string>
     <string name="watch_face_name">SKY</string>
+    <string name="settings_name">SKY Center</string>
 </resources>

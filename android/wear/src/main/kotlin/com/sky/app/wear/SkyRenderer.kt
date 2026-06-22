@@ -1,6 +1,7 @@
 package com.sky.app.wear
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -15,7 +16,6 @@ import androidx.wear.watchface.Renderer
 import androidx.wear.watchface.WatchState
 import androidx.wear.watchface.style.CurrentUserStyleRepository
 import com.sky.app.domain.CyclePalette
-import androidx.wear.watchface.style.UserStyleSetting
 import java.time.ZonedDateTime
 import kotlin.math.min
 
@@ -24,10 +24,10 @@ import kotlin.math.min
  * hour), each filled clockwise from the top by progress, colored per colors.md.
  * Ring data + colors come from the shared :core CyclePalette.
  *
- * The empty middle is configurable via the "Center" user style (see [SkyStyle]):
- * None (default, no text), a digital Time readout, two concentric 12-segment mini
- * rings (hour + minute), or the same two rings side by side. 12/24h follows the
- * system setting.
+ * The empty middle is configurable via the "Center" preference (see [SkyStyle],
+ * set from [SkySettingsActivity]): None (default, no text), a digital Time readout,
+ * two concentric 12-segment mini rings (hour + minute), or the same two rings side
+ * by side. 12/24h follows the system setting.
  */
 class SkyRenderer(
     private val context: Context,
@@ -43,7 +43,15 @@ class SkyRenderer(
     clearWithBackgroundTintBeforeRenderingHighlightLayer = false
 ) {
 
-    private val styleRepository = currentUserStyleRepository
+    // Redraw immediately when the Center preference changes (same process as the
+    // settings app). render() also re-reads it on the next frame as a fallback.
+    private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+        if (key == SkyStyle.KEY_CENTER) invalidate()
+    }
+
+    init {
+        SkyStyle.prefs(context).registerOnSharedPreferenceChangeListener(prefListener)
+    }
 
     class SkyAssets : Renderer.SharedAssets {
         override fun onDestroy() {}
@@ -91,9 +99,7 @@ class SkyRenderer(
 
     /** Draws the user-selected center content (if any) in the empty middle. */
     private fun drawCenter(canvas: Canvas, cx: Float, cy: Float, r: Float, time: ZonedDateTime, ambient: Boolean) {
-        val option = (styleRepository.userStyle.value[SkyStyle.CENTER_SETTING_ID]
-                as? UserStyleSetting.ListUserStyleSetting.ListOption)?.id?.value
-            ?: SkyStyle.CENTER_NONE
+        val option = SkyStyle.centerOption(context)
 
         val is24h = DateFormat.is24HourFormat(context)
         val hour12 = ((time.hour + 11) % 12) + 1
