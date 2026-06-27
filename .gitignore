@@ -3,3 +3,5 @@
 
 # JVM heap dumps
 *.hprof
+build-release.bat
+*.keystore

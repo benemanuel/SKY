@@ -1,10 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Matches the watch face icon (wear/res/drawable/watch_preview.xml): a midnight
+     disc with season/week rings and the moon. The 72-viewport watch art is centered
+     within the 108 adaptive-icon viewport (translate 18) so the disc sits inside the
+     safe zone. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-  <path
-      android:fillColor="#FFFFFF"
-      android:pathData="M54,24C37.43,24 24,37.43 24,54s13.43,30 30,30 30,-13.43 30,-30S70.57,24 54,24zM54,74C40.75,74 30,63.25 30,50s10.75,-24 24,-24 24,10.75 24,24 -10.75,24 -24,24z"/>
+    <group android:translateX="18" android:translateY="18">
+        <!-- Midnight disc -->
+        <path
+            android:fillColor="#0B1026"
+            android:pathData="M4,36 a32,32 0 1,0 64,0 a32,32 0 1,0 -64,0" />
+        <!-- Season ring -->
+        <path
+            android:strokeColor="#9CCF9F"
+            android:strokeWidth="2.5"
+            android:fillColor="#00000000"
+            android:pathData="M8,36 a28,28 0 1,0 56,0 a28,28 0 1,0 -56,0" />
+        <!-- Week ring -->
+        <path
+            android:strokeColor="#C9A66B"
+            android:strokeWidth="2.5"
+            android:fillColor="#00000000"
+            android:pathData="M14,36 a22,22 0 1,0 44,0 a22,22 0 1,0 -44,0" />
+        <!-- Moon -->
+        <path
+            android:fillColor="#ECE3D0"
+            android:pathData="M27,36 a9,9 0 1,0 18,0 a9,9 0 1,0 -18,0" />
+    </group>
 </vector>

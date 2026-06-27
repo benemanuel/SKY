@@ -82,6 +82,8 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.6.1")
 
     implementation("com.google.android.gms:play-services-location:21.1.0")
+    // Wearable Data Layer: push the watch face Center choice to the paired watch.
+    implementation("com.google.android.gms:play-services-wearable:18.1.0")
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
     // Home-screen widget (Compose-style App Widget)

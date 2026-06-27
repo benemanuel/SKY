@@ -32,7 +32,9 @@ per-day color for the week, and the 00:00–11:00 wheel for the hour.
   rings* (the same two rings side by side). Because Wear OS 5 does not show the
   system "Customize" editor for code-based watch faces, the option is changed from
   a small companion app on the watch — **"SKY Center"** in the app list — which
-  writes a preference the watch face reads live.
+  writes a preference the watch face reads live. The **"Center"** option can also be
+  edited from the **phone app** (a "Watch face center" panel, shown when a watch with
+  SKY is connected); the choice syncs over the Wearable Data Layer in both directions.
 
 ## Modules
 
@@ -44,11 +46,13 @@ android/
 │   └── src/main/kotlin/com/sky/app/domain/
 │       ├── CelestialCalculations.kt   # lunar / season / sun / temporal hours / tides
 │       ├── HebrewStrings.kt           # Hebrew phase + season names
-│       └── CyclePalette.kt            # colors.md wheel + the four-ring model
+│       ├── CyclePalette.kt            # colors.md wheel + the four-ring model
+│       └── CenterStyle.kt             # watch "Center" options + Data Layer path/key
 ├── src/main/                   # phone app module
 │   ├── kotlin/com/sky/app/
 │   │   ├── MainActivity.kt
-│   │   ├── data/               # LocationRepository, PreferencesRepository
+│   │   ├── data/               # LocationRepository, PreferencesRepository,
+│   │   │                       #   WatchSettingsRepository (Data Layer → watch)
 │   │   ├── viewmodel/SkyViewModel.kt
 │   │   ├── ui/                 # SkyApp (rings), theme/ (Instrument palette)
 │   │   └── widget/             # SkyGlanceWidget, CycleRingsBitmap, MoonBitmap
@@ -56,8 +60,9 @@ android/
 └── wear/                       # :wear — Wear OS watch face
     └── src/main/kotlin/com/sky/app/wear/
         ├── SkyWatchFaceService.kt
-        ├── SkyStyle.kt              # "Center" options + preference helper
+        ├── SkyStyle.kt              # preference helper (options live in :core/CenterStyle)
         ├── SkySettingsActivity.kt   # launchable "SKY Center" settings app
+        ├── WatchSettingsListenerService.kt  # receives the Center choice from the phone
         └── SkyRenderer.kt
 ```
 

@@ -28,6 +28,30 @@
    The `ANDROID_README.md` has been refreshed for this design (modules, build/sign/install, calculations, and watch-face battery notes), and the color spec is
    `colors.md`. Note: these doc updates were committed on `main` after the v1.3.0 tag.
    
+## Unreleased
+
+### Edit the watch face from the phone
+- The phone app can now change the watch face **"Center"** option remotely over the
+  **Wearable Data Layer** — no need to open the on-watch settings app.
+  - A collapsible **"Watch face center"** panel appears at the bottom of the phone
+    app **only when a watch with SKY is connected**; picking an option pushes the
+    choice to the watch, which redraws immediately.
+  - Sync is two-way: changing the option from the on-watch **"SKY Center"** app also
+    updates the phone UI.
+  - The choice is sent as a persistent `DataItem` (path `/sky/center`), so a change
+    made while the watch is unreachable still syncs on reconnect. The watch remains
+    fully standalone — it always renders from its own SharedPreferences.
+- The option ids/labels and the Data Layer path/key now live in a single
+  `CenterStyle` object in `:core`, shared by `:app` and `:wear` so they can't drift.
+- New components: `:core/CenterStyle`, `:app/WatchSettingsRepository`,
+  `:wear/WatchSettingsListenerService`. Both modules gained
+  `com.google.android.gms:play-services-wearable`.
+
+### Phone app icon matches the watch
+- The phone launcher icon now uses the watch face's design — the midnight disc with
+  the season ring, week ring, and moon (centered in the adaptive-icon safe zone; the
+  adaptive background is the same midnight tone so the masked shape reads seamlessly).
+
 ## v1.3.0 (versionCode 3)
 
 ### Unified "cycle rings" design across app, widget, and watch

@@ -4,15 +4,32 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Watch
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -24,7 +41,9 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.sky.app.domain.CenterStyle
 import com.sky.app.domain.CyclePalette
 import com.sky.app.ui.theme.Inst
 import com.sky.app.viewmodel.SkyViewModel
@@ -47,8 +66,12 @@ fun SkyApp(viewModel: SkyViewModel) {
 
     // Use the device location if it's already granted; otherwise the Jerusalem
     // default stands. No on-screen control — the rings are the whole UI.
+    val watchConnected by viewModel.watchConnected.collectAsState()
+    val watchCenter by viewModel.watchCenterOption.collectAsState()
+
     val context = LocalContext.current
     LaunchedEffect(Unit) {
+        viewModel.refreshWatchConnected()
         val granted =
             ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED ||
@@ -70,6 +93,78 @@ fun SkyApp(viewModel: SkyViewModel) {
                 .padding(20.dp)
                 .aspectRatio(1f)
         )
+
+        if (watchConnected) {
+            WatchFaceSettings(
+                selected = watchCenter,
+                onSelect = viewModel::setWatchCenterOption,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+            )
+        }
+    }
+}
+
+/**
+ * Editor for the paired watch face's "Center" option. Collapsed to a small watch
+ * chip; expands to a radio list that pushes the choice over the Data Layer. Shown
+ * only when a watch with the SKY app is connected.
+ */
+@Composable
+private fun WatchFaceSettings(
+    selected: String,
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = Inst.inkMid,
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded }
+                    .padding(vertical = 4.dp),
+            ) {
+                Icon(
+                    Icons.Filled.Watch,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp),
+                )
+                Text(
+                    text = "Watch face center",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                )
+            }
+
+            if (expanded) {
+                CenterStyle.OPTIONS.forEach { (id, label) ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(id) }
+                            .padding(vertical = 2.dp),
+                    ) {
+                        RadioButton(
+                            selected = id == selected,
+                            onClick = { onSelect(id) },
+                        )
+                        Spacer(Modifier.size(4.dp))
+                        Text(text = label, color = Color.White, fontSize = 14.sp)
+                    }
+                }
+            }
+        }
     }
 }
 

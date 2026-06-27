@@ -64,5 +64,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     // Code-based watch face (Canvas renderer).
     implementation("androidx.wear.watchface:watchface:1.2.1")
+    // Wearable Data Layer: receive the Center choice pushed from the phone.
+    implementation("com.google.android.gms:play-services-wearable:18.1.0")
     implementation(kotlin("stdlib"))
 }

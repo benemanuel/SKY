@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sky.app.data.LocationRepository
 import com.sky.app.data.PreferencesRepository
+import com.sky.app.data.WatchSettingsRepository
 import com.sky.app.domain.CelestialCalculations
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +16,13 @@ import java.time.LocalDateTime
 class SkyViewModel(application: Application) : AndroidViewModel(application) {
     private val preferencesRepository = PreferencesRepository(application)
     private val locationRepository = LocationRepository(application)
+    private val watchSettingsRepository = WatchSettingsRepository(application)
+
+    /** Current watch face "Center" choice, synced over the Wearable Data Layer. */
+    val watchCenterOption: StateFlow<String> = watchSettingsRepository.centerOption
+
+    /** Whether a watch with the SKY app is currently connected. */
+    val watchConnected: StateFlow<Boolean> = watchSettingsRepository.watchConnected
 
     // Default coordinates: Jerusalem, Israel (matches the web app default).
     private val _latitude = MutableStateFlow(31.7781)
@@ -59,6 +67,21 @@ class SkyViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         startUpdating()
+        watchSettingsRepository.start()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        watchSettingsRepository.stop()
+    }
+
+    /** Push a new watch face Center choice to the connected watch. */
+    fun setWatchCenterOption(id: String) {
+        watchSettingsRepository.setCenterOption(id)
+    }
+
+    fun refreshWatchConnected() {
+        watchSettingsRepository.refreshWatchConnected()
     }
 
     fun toggleDarkMode() {
