@@ -3,9 +3,12 @@ package com.sky.app.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.sky.app.BuildConfig
 import com.sky.app.data.LocationRepository
 import com.sky.app.data.PreferencesRepository
+import com.sky.app.data.UpdateInfo
 import com.sky.app.data.WatchSettingsRepository
+import com.sky.app.data.checkForUpdate
 import com.sky.app.domain.CelestialCalculations
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,6 +20,9 @@ class SkyViewModel(application: Application) : AndroidViewModel(application) {
     private val preferencesRepository = PreferencesRepository(application)
     private val locationRepository = LocationRepository(application)
     private val watchSettingsRepository = WatchSettingsRepository(application)
+
+    private val _updateInfo = MutableStateFlow<UpdateInfo?>(null)
+    val updateInfo: StateFlow<UpdateInfo?> = _updateInfo.asStateFlow()
 
     /** Current watch face "Center" choice, synced over the Wearable Data Layer. */
     val watchCenterOption: StateFlow<String> = watchSettingsRepository.centerOption
@@ -68,12 +74,17 @@ class SkyViewModel(application: Application) : AndroidViewModel(application) {
         }
         startUpdating()
         watchSettingsRepository.start()
+        viewModelScope.launch {
+            _updateInfo.value = checkForUpdate(BuildConfig.VERSION_CODE)
+        }
     }
 
     override fun onCleared() {
         super.onCleared()
         watchSettingsRepository.stop()
     }
+
+    fun dismissUpdate() { _updateInfo.value = null }
 
     /** Push a new watch face Center choice to the connected watch. */
     fun setWatchCenterOption(id: String) {

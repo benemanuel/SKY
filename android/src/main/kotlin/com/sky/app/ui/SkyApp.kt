@@ -1,7 +1,9 @@
 package com.sky.app.ui
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +19,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.SystemUpdate
 import androidx.compose.material.icons.filled.Watch
 import androidx.compose.material3.Icon
 import androidx.compose.material3.RadioButton
@@ -42,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.sky.app.data.UpdateInfo
 import com.sky.app.domain.CenterStyle
 import com.sky.app.domain.CyclePalette
 import com.sky.app.ui.theme.Inst
@@ -67,6 +72,7 @@ fun SkyApp(viewModel: SkyViewModel) {
     // default stands. No on-screen control — the rings are the whole UI.
     val watchConnected by viewModel.watchConnected.collectAsState()
     val watchCenter by viewModel.watchCenterOption.collectAsState()
+    val updateInfo by viewModel.updateInfo.collectAsState()
 
     val context = LocalContext.current
     LaunchedEffect(Unit) {
@@ -93,6 +99,16 @@ fun SkyApp(viewModel: SkyViewModel) {
                 .aspectRatio(1f)
         )
 
+        if (updateInfo?.updateAvailable == true) {
+            UpdateBanner(
+                info = updateInfo!!,
+                onDismiss = viewModel::dismissUpdate,
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(16.dp)
+            )
+        }
+
         if (watchConnected) {
             WatchFaceSettings(
                 selected = watchCenter,
@@ -100,6 +116,58 @@ fun SkyApp(viewModel: SkyViewModel) {
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun UpdateBanner(
+    info: UpdateInfo,
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = Inst.inkMid,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+        ) {
+            Icon(
+                Icons.Filled.SystemUpdate,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(20.dp),
+            )
+            Column(modifier = Modifier
+                .weight(1f)
+                .clickable {
+                    context.startActivity(
+                        Intent(Intent.ACTION_VIEW, Uri.parse(info.releaseUrl))
+                    )
+                }
+            ) {
+                Text(
+                    text = "Update available: ${info.versionName}",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                )
+                if (info.notes.isNotEmpty()) {
+                    Text(text = info.notes, color = Color.White, fontSize = 12.sp)
+                }
+            }
+            Icon(
+                Icons.Filled.Close,
+                contentDescription = "Dismiss",
+                tint = Color.White,
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable { onDismiss() },
             )
         }
     }
