@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -147,9 +148,7 @@ private fun UpdateBanner(
             Column(modifier = Modifier
                 .weight(1f)
                 .clickable {
-                    context.startActivity(
-                        Intent(Intent.ACTION_VIEW, Uri.parse(info.releaseUrl))
-                    )
+                   safeOpenUrl(context, info.releaseUrl)
                 }
             ) {
                 Text(
@@ -265,5 +264,33 @@ private fun DrawScope.notchedRing(ring: CyclePalette.Ring, center: Offset, radiu
         if (fill > 0f) {
             drawArc(Color(ring.colors[i]), segStart, sweepFull * fill, false, topLeft, arcSize, style = st)
         }
+    }
+}
+
+private fun safeOpenUrl(context: android.content.Context, url: String) {
+    if (url.isBlank()) return
+
+    val uri = try {
+        val safeUrl = url.trim()
+        // Enforce HTTPS (preferred for updates); allow HTTP only if needed
+        if (!safeUrl.startsWith("https://") && !safeUrl.startsWith("http://")) {
+            Log.w("SkyApp", "Blocked non-HTTP(S) URL: $safeUrl")
+            return
+        }
+        // Optional: Restrict to your trusted update domain(s)
+        // if (!safeUrl.startsWith("https://your-update-domain.com/")) return
+
+        Uri.parse(safeUrl)
+    } catch (e: Exception) {
+        Log.e("SkyApp", "Invalid URL: $url", e)
+        return
+    }
+
+    try {
+        context.startActivity(Intent(Intent.ACTION_VIEW, uri))
+    } catch (e: android.content.ActivityNotFoundException) {
+        Log.w("SkyApp", "No activity found to handle URL: $url")
+    } catch (e: Exception) {
+        Log.e("SkyApp", "Failed to open URL", e)
     }
 }
