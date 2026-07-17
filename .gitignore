@@ -6,3 +6,4 @@
 build-release.bat
 *.keystore
 keystore.properties
+/android/.kotlin
