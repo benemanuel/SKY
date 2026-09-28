@@ -43,10 +43,10 @@ class SkyRenderer(
     clearWithBackgroundTintBeforeRenderingHighlightLayer = false
 ) {
 
-    // Redraw immediately when the Center preference changes (same process as the
-    // settings app). render() also re-reads it on the next frame as a fallback.
+    // Redraw immediately when the Center choice or the phone-pushed location changes.
+    // render() also re-reads both on the next frame as a fallback.
     private val prefListener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
-        if (key == SkyStyle.KEY_CENTER) invalidate()
+        if (key == SkyStyle.KEY_CENTER || key == SkyStyle.KEY_LAT || key == SkyStyle.KEY_LON) invalidate()
     }
 
     init {
@@ -58,10 +58,6 @@ class SkyRenderer(
     }
 
     override suspend fun createSharedAssets(): SkyAssets = SkyAssets()
-
-    // Jerusalem default (a watch face can't request the location permission).
-    private val lat = 31.7781
-    private val lon = 35.2360
 
     private val arcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
@@ -88,6 +84,9 @@ class SkyRenderer(
         val cy = bounds.exactCenterY()
         val r = min(bounds.width(), bounds.height()) / 2f
 
+        // Location comes from the phone over the Data Layer (a watch face can't request
+        // the location permission itself); Jerusalem until the phone has sent one.
+        val (lat, lon) = SkyStyle.location(context)
         val rings = CyclePalette.rings(zonedDateTime.toLocalDateTime(), zonedDateTime.zone, lat, lon)
         arcPaint.strokeWidth = r * 0.07f
         rings.forEachIndexed { idx, ring ->

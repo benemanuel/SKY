@@ -5,14 +5,18 @@ import com.google.android.gms.wearable.DataEventBuffer
 import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.WearableListenerService
 import com.sky.app.domain.CenterStyle
+import com.sky.app.domain.WatchLocation
 
 /**
- * Receives the "Center" choice pushed from the phone over the Wearable Data Layer
- * and mirrors it into [SkyStyle]'s SharedPreferences. The running watch face redraws
- * automatically via its existing preference-change listener.
+ * Receives settings pushed from the phone over the Wearable Data Layer and mirrors
+ * them into [SkyStyle]'s SharedPreferences:
+ *  - the "Center" choice ([CenterStyle.PATH])
+ *  - the phone's location ([WatchLocation.PATH]), used for sunrise/sunset and the
+ *    temporal-hour ring instead of the Jerusalem default.
+ * The running watch face redraws automatically via its preference-change listener.
  *
- * A DataItem (rather than a one-off message) is used so the value still syncs when
- * the watch was unreachable at the moment the phone changed it.
+ * DataItems (rather than one-off messages) are used so values still sync when the
+ * watch was unreachable at the moment the phone changed them.
  */
 class WatchSettingsListenerService : WearableListenerService() {
 
@@ -20,12 +24,25 @@ class WatchSettingsListenerService : WearableListenerService() {
         for (event in events) {
             if (event.type != DataEvent.TYPE_CHANGED) continue
             val item = event.dataItem
-            if (item.uri.path != CenterStyle.PATH) continue
-
             val map = DataMapItem.fromDataItem(item).dataMap
-            val id = map.getString(CenterStyle.KEY)
-            if (CenterStyle.isValid(id)) {
-                SkyStyle.setCenterOption(this, id!!)
+
+            when (item.uri.path) {
+                CenterStyle.PATH -> {
+                    val id = map.getString(CenterStyle.KEY)
+                    if (CenterStyle.isValid(id)) {
+                        SkyStyle.setCenterOption(this, id!!)
+                    }
+                }
+
+                WatchLocation.PATH -> {
+                    if (map.containsKey(WatchLocation.KEY_LAT) && map.containsKey(WatchLocation.KEY_LON)) {
+                        val lat = map.getDouble(WatchLocation.KEY_LAT)
+                        val lon = map.getDouble(WatchLocation.KEY_LON)
+                        if (WatchLocation.isValid(lat, lon)) {
+                            SkyStyle.setLocation(this, lat, lon)
+                        }
+                    }
+                }
             }
         }
     }
