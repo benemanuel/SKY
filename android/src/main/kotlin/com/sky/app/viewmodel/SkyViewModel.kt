@@ -10,6 +10,7 @@ import com.sky.app.data.UpdateInfo
 import com.sky.app.data.WatchSettingsRepository
 import com.sky.app.data.checkForUpdate
 import com.sky.app.domain.CelestialCalculations
+import com.sky.app.domain.WatchLocation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,8 +32,8 @@ class SkyViewModel(application: Application) : AndroidViewModel(application) {
     val watchConnected: StateFlow<Boolean> = watchSettingsRepository.watchConnected
 
     // Default coordinates: Jerusalem, Israel (matches the web app default).
-    private val _latitude = MutableStateFlow(31.7781)
-    private val _longitude = MutableStateFlow(35.2360)
+    private val _latitude = MutableStateFlow(WatchLocation.DEFAULT_LAT)
+    private val _longitude = MutableStateFlow(WatchLocation.DEFAULT_LON)
     val latitude: StateFlow<Double> = _latitude.asStateFlow()
     val longitude: StateFlow<Double> = _longitude.asStateFlow()
 
@@ -115,6 +116,8 @@ class SkyViewModel(application: Application) : AndroidViewModel(application) {
         _longitude.value = longitude
         _isCustomLocation.value = true
         updateCelestialInfo()
+        // Keep the watch face on the same location as the phone.
+        watchSettingsRepository.setLocation(latitude, longitude)
     }
 
     private fun updateCelestialInfo() {

@@ -8,6 +8,7 @@ import com.google.android.gms.wearable.DataMapItem
 import com.google.android.gms.wearable.PutDataMapRequest
 import com.google.android.gms.wearable.Wearable
 import com.sky.app.domain.CenterStyle
+import com.sky.app.domain.WatchLocation
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -73,6 +74,21 @@ class WatchSettingsRepository(application: Application) {
             dataMap.putString(CenterStyle.KEY, id)
             // Force a distinct DataItem each time so repeated picks still sync.
             dataMap.putLong("timestamp", System.currentTimeMillis())
+        }.asPutDataRequest().setUrgent()
+        dataClient.putDataItem(request)
+    }
+
+    /**
+     * Push the phone's location to the watch face. Persisted as a DataItem, so it
+     * reaches the watch whenever it next connects. Coordinates are rounded (see
+     * [WatchLocation.round]) and no timestamp is added, so an unchanged location
+     * produces an identical DataItem and triggers no sync.
+     */
+    fun setLocation(latitude: Double, longitude: Double) {
+        if (!WatchLocation.isValid(latitude, longitude)) return
+        val request = PutDataMapRequest.create(WatchLocation.PATH).apply {
+            dataMap.putDouble(WatchLocation.KEY_LAT, WatchLocation.round(latitude))
+            dataMap.putDouble(WatchLocation.KEY_LON, WatchLocation.round(longitude))
         }.asPutDataRequest().setUrgent()
         dataClient.putDataItem(request)
     }

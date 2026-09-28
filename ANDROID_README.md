@@ -35,6 +35,12 @@ per-day color for the week, and the 00:00–11:00 wheel for the hour.
   writes a preference the watch face reads live. The **"Center"** option can also be
   edited from the **phone app** (a "Watch face center" panel, shown when a watch with
   SKY is connected); the choice syncs over the Wearable Data Layer in both directions.
+  **Location:** the watch face has no location permission of its own, so whenever the
+  phone app gets a location fix it pushes it (rounded to 0.01°, ~1 km) to the watch
+  over the Data Layer (`/sky/location`). The watch persists it and uses it for the
+  sunrise/sunset-based hour ring; until the phone has sent one, it uses Jerusalem.
+  The phone only takes a fix when the app is opened, so the watch's location is
+  as fresh as the last time the phone app was opened.
 
 ## Modules
 
@@ -47,7 +53,8 @@ android/
 │       ├── CelestialCalculations.kt   # lunar / season / sun / temporal hours / tides
 │       ├── HebrewStrings.kt           # Hebrew phase + season names
 │       ├── CyclePalette.kt            # colors.md wheel + the four-ring model
-│       └── CenterStyle.kt             # watch "Center" options + Data Layer path/key
+│       ├── CenterStyle.kt             # watch "Center" options + Data Layer path/key
+│       └── WatchLocation.kt           # phone→watch location Data Layer path/keys + default
 ├── src/main/                   # phone app module
 │   ├── kotlin/com/sky/app/
 │   │   ├── MainActivity.kt
@@ -154,7 +161,8 @@ This face is deliberately on the efficient end; the dominant factor is whether
 - **Trivial compute** per redraw: a little trig plus a handful of `drawArc` calls,
   once a minute — negligible CPU/GC.
 - **No extra drains**: no complications, no sensors (heart rate/GPS), no network, and
-  no on-watch location polling (it uses the Jerusalem default).
+  no on-watch location polling (the location is pushed from the phone over the Data
+  Layer; the watch only wakes when it actually changes by ~1 km or more).
 - **AMOLED-friendly ambient**: the ambient frame is mostly black with a few thin
   dim-gray arcs, so very few pixels are lit.
 
